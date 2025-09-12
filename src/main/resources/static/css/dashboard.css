@@ -1,0 +1,315 @@
+/* Estilo geral para o corpo do dashboard */
+body {
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+/* --- CABEÇALHO --- */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.main-header .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0056b3;
+}
+
+.main-nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+}
+
+.main-nav a.active {
+    color: #0056b3;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.user-profile .fa-user-circle {
+    font-size: 24px;
+    margin-left: 10px;
+}
+
+/* --- CONTEÚDO PRINCIPAL --- */
+.main-content {
+    padding: 40px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.btn-new-idea {
+    background-color: #0056b3;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+}
+.btn-new-idea .fa-plus {
+    margin-right: 8px;
+}
+
+/* --- CARDS DE RESUMO --- */
+.summary-cards {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.card-icon {
+    font-size: 24px;
+    color: #0056b3;
+    margin-right: 15px;
+}
+
+.card-info .card-title {
+    display: block;
+    color: #777;
+}
+
+.card-info .card-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* --- CORPO DO DASHBOARD (COLUNAS) --- */
+.dashboard-body {
+    display: flex;
+    gap: 30px;
+}
+
+.main-column {
+    flex: 3;
+}
+
+.sidebar {
+    flex: 1;
+}
+
+/* --- ESTILO DOS POSTS DE IDEIA --- */
+.idea-post {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.idea-post.approved {
+    border-left: 4px solid #28a745;
+}
+
+.idea-post h3 {
+    margin: 10px 0;
+}
+
+.post-footer {
+    margin-top: 15px;
+    color: #777;
+}
+
+.post-footer span {
+    margin-right: 15px;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 14px;
+}
+
+.status-approved {
+    background-color: #e4f8e8;
+    color: #28a745;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* --- ESTILO DA BARRA LATERAL (SIDEBAR) --- */
+.sidebar-widget {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.sidebar-widget h3 {
+    margin-top: 0;
+}
+
+.top-ideas {
+    padding: 0;
+    list-style: none;
+}
+
+.top-ideas li {
+    margin-bottom: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.top-ideas li span.rank {
+    font-weight: 700;
+    margin-right: 8px;
+    color: #0056b3;
+}
+
+.top-ideas li span.title-truncated {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+
+.top-ideas .votes {
+    font-weight: 700;
+    color: #555;
+    flex-shrink: 0;
+}
+
+
+/* --- ESTILO DO BOTÃO DE LOGOFF --- */
+.btn-logoff {
+    margin-left: 20px;
+    padding: 8px 12px;
+    background-color: #f4f7f6;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-logoff:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.btn-logoff .fa-sign-out-alt {
+    margin-right: 6px;
+}
+
+
+/* --- ESTILOS DO MODAL DE NOVA IDEIA --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.fechar-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+.modal-content .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.btn-submit-idea {
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+}

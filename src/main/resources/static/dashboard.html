@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EuroInova</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo">Eurolnova</div>
+    <nav class="main-nav">
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Minhas Ideias</a>
+        <a href="#">Explorar</a>
+    </nav>
+    <div class="user-profile">
+        <span id="nome-usuario">Carregando...</span>
+        <i class="fas fa-user-circle"></i>
+        <a href="#" id="btn-logoff" class="btn-logoff">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="page-header">
+        <h1 id="mensagem-boas-vindas">Bem-vindo(a)!</h1>
+        <button class="btn-new-idea"><i class="fas fa-plus"></i> Nova Ideia</button>
+    </div>
+
+    <section class="summary-cards">
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-lightbulb"></i></div>
+            <div class="card-info">
+                <span class="card-title">Minhas ideias</span>
+                <span class="card-value" id="stats-minhas-ideias">0</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="card-info">
+                <span class="card-title">Ideias Aprovadas</span>
+                <span class="card-value" id="stats-aprovadas">0</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-clock"></i></div>
+            <div class="card-info">
+                <span class="card-title">Ideias Pendentes</span>
+                <span class="card-value" id="stats-pendentes">0</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-users"></i></div>
+            <div class="card-info">
+                <span class="card-title">Contribuições</span>
+                <span class="card-value" id="stats-contribuicoes">0</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-body">
+        <div class="main-column">
+            <div class="list-header">
+                <h2>Ideias Recentes</h2>
+            </div>
+            <div class="idea-list">
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="sidebar-widget">
+                <h3>Ideias Mais Votadas</h3>
+                <ul class="top-ideas" id="top-ideas-list">
+                </ul>
+            </div>
+            <div class="sidebar-widget assistant">
+                <h3>Assistente Virtual</h3>
+                <p>Tem alguma dúvida? Nosso assistente virtual pode te ajudar!</p>
+                <button class="btn-assistant">Iniciar conversa</button>
+            </div>
+        </aside>
+    </section>
+</main>
+
+<div id="modal-nova-ideia" class="modal-overlay hidden">
+    <div class="modal-content">
+        <button id="fechar-modal" class="fechar-modal">&times;</button>
+        <h2>Compartilhe sua Nova Ideia</h2>
+        <form id="nova-ideia-form">
+            <div class="form-group">
+                <label for="ideia-titulo">Título da Ideia</label>
+                <input type="text" id="ideia-titulo" required placeholder="Ex: Automação de Relatórios">
+            </div>
+            <div class="form-group">
+                <label for="ideia-descricao">Descreva sua ideia</label>
+                <textarea id="ideia-descricao" rows="6" required placeholder="Detalhe como sua ideia pode melhorar um processo ou criar algo novo."></textarea>
+            </div>
+            <button type="submit" class="btn-submit-idea">Enviar Ideia</button>
+        </form>
+    </div>
+</div>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
