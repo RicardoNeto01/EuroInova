@@ -46,11 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderizarIdeias(ideias) {
-        const container = ideaListContainer || document.querySelector('.idea-list-container');
-
-        container.innerHTML = '';
+        ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
-            container.innerHTML = '<p>Nenhuma ideia foi enviada ainda.</p>';
+            ideaListContainer.innerHTML = '<p>Você ainda não enviou nenhuma ideia.</p>';
             return;
         }
         ideias.forEach(ideia => {
@@ -69,42 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </article>
             `;
-            container.insertAdjacentHTML('beforeend', postHTML);
+            ideaListContainer.insertAdjacentHTML('beforeend', postHTML);
         });
     }
-
-    // Lógica para escutar cliques na lista de ideias (Event Delegation)
-    const containerDeIdeias = document.querySelector('.idea-list, .idea-list-container');
-    containerDeIdeias.addEventListener('click', async function(event) {
-        // Verifica se o elemento clicado (ou um parente próximo) é o botão de votar
-        const voteButton = event.target.closest('.btn-votar');
-
-        if (voteButton) {
-            // Pega o ID da ideia a partir do atributo data-id do <article>
-            const postArticle = voteButton.closest('.idea-post');
-            const ideaId = postArticle.dataset.id;
-
-            try {
-                const response = await fetch(`/api/ideias/${ideaId}/votar`, {
-                    method: 'POST'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Não foi possível registrar o voto.');
-                }
-
-                const ideiaAtualizada = await response.json();
-
-                // Atualiza o número de votos na tela em tempo real
-                const votesSpan = postArticle.querySelector('.votes');
-                votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
-
-            } catch (error) {
-                console.error('Erro ao votar:', error);
-                alert(error.message);
-            }
-        }
-    });
 
     async function carregarTopIdeias() {
         const topIdeiasList = document.getElementById('top-ideas-list');
@@ -144,10 +109,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- 3. LÓGICA DE VOTAÇÃO ---
+    ideaListContainer.addEventListener('click', async function(event) {
+        const voteButton = event.target.closest('.btn-votar');
+        if (voteButton) {
+            const postArticle = voteButton.closest('.idea-post');
+            const ideaId = postArticle.dataset.id;
+            try {
+                const response = await fetch(`/api/ideias/${ideaId}/votar?usuarioId=${usuarioLogado.id}`, {
+                    method: 'POST'
+                });
+                if (!response.ok) throw new Error('Não foi possível registrar o voto.');
 
-    // --- 3. LÓGICA DO MODAL DE NOVA IDEIA ---
+                const ideiaAtualizada = await response.json();
+
+                const votesSpan = postArticle.querySelector('.votes');
+                votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
+
+                carregarTopIdeias();
+                carregarStats();
+
+            } catch (error) {
+                console.error('Erro ao votar:', error);
+                alert(error.message);
+            }
+        }
+    });
+
+    // --- 4. LÓGICA DO MODAL DE NOVA IDEIA ---
     const modal = document.getElementById('modal-nova-ideia');
     const btnAbrirModal = document.querySelector('.btn-new-idea');
+    // ... (resto do código do modal, logoff, etc. sem alterações) ...
     const btnFecharModal = document.getElementById('fechar-modal');
     const formNovaIdeia = document.getElementById('nova-ideia-form');
 
@@ -162,7 +154,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const titulo = document.getElementById('ideia-titulo').value;
         const descricao = document.getElementById('ideia-descricao').value;
         const novaIdeia = { titulo, descricao };
-
         try {
             const response = await fetch(`/api/ideias?usuarioId=${usuarioLogado.id}`, {
                 method: 'POST',
@@ -175,6 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formNovaIdeia.reset();
             fecharModal();
             carregarIdeias();
+
             carregarStats();
             carregarTopIdeias();
         } catch (error) {
@@ -183,7 +175,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- 4. LÓGICA DO BOTÃO DE LOGOFF ---
+    // --- 5. LÓGICA DO MENU LATERAL (SIDENAV) ---
+    const hamburgerBtn = document.getElementById('hamburger-menu');
+    const sideNav = document.getElementById('side-nav');
+    const overlay = document.getElementById('overlay');
+
+    function abrirMenu() { sideNav.classList.add('show'); overlay.classList.add('show'); }
+    function fecharMenu() { sideNav.classList.remove('show'); overlay.classList.remove('show'); }
+
+    hamburgerBtn.addEventListener('click', abrirMenu);
+    overlay.addEventListener('click', fecharMenu);
+
+    // --- 6. LÓGICA DO BOTÃO DE LOGOFF ---
     const btnLogoff = document.getElementById('btn-logoff');
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
@@ -192,26 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/login.html';
     });
 
-    // --- 5. LÓGICA DO MENU LATERAL (SIDENAV) ---
-    const hamburgerBtn = document.getElementById('hamburger-menu');
-    const sideNav = document.getElementById('side-nav');
-    const overlay = document.getElementById('overlay');
-
-    function abrirMenu() {
-        sideNav.classList.add('show');
-        overlay.classList.add('show');
-    }
-
-    function fecharMenu() {
-        sideNav.classList.remove('show');
-        overlay.classList.remove('show');
-    }
-
-    hamburgerBtn.addEventListener('click', abrirMenu);
-    overlay.addEventListener('click', fecharMenu);
-
-
-    // --- 6. CHAMADAS INICIAIS ---
+    // --- 7. CHAMADAS INICIAIS ---
     carregarStats();
     carregarIdeias();
     carregarTopIdeias();

@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- LÓGICA DE AUTENTICAÇÃO E NOME DE USUÁRIO ---
-    // (Reutilizamos a lógica do dashboard para proteger a página e mostrar o nome)
+    // --- 1. LÓGICA DE AUTENTICAÇÃO E NOME DE USUÁRIO ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
     if (!usuarioLogado) {
         alert('Você precisa estar logado para acessar esta página.');
@@ -9,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
 
-    // --- LÓGICA DO MENU LATERAL (reutilizada) ---
+    // --- 2. LÓGICA DO MENU LATERAL (SIDENAV) ---
     const hamburgerBtn = document.getElementById('hamburger-menu');
     const sideNav = document.getElementById('side-nav');
     const overlay = document.getElementById('overlay');
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     hamburgerBtn.addEventListener('click', abrirMenu);
     overlay.addEventListener('click', fecharMenu);
 
-    // --- LÓGICA DO BOTÃO DE LOGOFF (reutilizada) ---
+    // --- 3. LÓGICA DO BOTÃO DE LOGOFF ---
     const btnLogoff = document.getElementById('btn-logoff');
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
@@ -28,12 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    // --- FUNÇÃO PRINCIPAL PARA CARREGAR TODAS AS IDEIAS ---
+    // --- 4. FUNÇÃO PRINCIPAL PARA CARREGAR TODAS AS IDEIAS ---
     const ideaListContainer = document.querySelector('.idea-list-container');
 
     async function carregarTodasIdeias() {
         try {
-            // Chama o novo endpoint /api/ideias/todas
+            // Chama o endpoint que busca todas as ideias de todos os usuários
             const response = await fetch('/api/ideias/todas');
             if (!response.ok) throw new Error('Falha ao carregar ideias');
 
@@ -45,13 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
+    // A função de renderizar é a mesma do dashboard, para manter o visual
     function renderizarIdeias(ideias) {
-        const container = ideaListContainer || document.querySelector('.idea-list-container');
-
-        container.innerHTML = '';
+        ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
-            container.innerHTML = '<p>Nenhuma ideia foi enviada ainda.</p>';
+            ideaListContainer.innerHTML = '<p>Nenhuma ideia foi enviada ainda na plataforma.</p>';
             return;
         }
         ideias.forEach(ideia => {
@@ -70,34 +67,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </article>
             `;
-            container.insertAdjacentHTML('beforeend', postHTML);
+            ideaListContainer.insertAdjacentHTML('beforeend', postHTML);
         });
     }
-    // Lógica para escutar cliques na lista de ideias (Event Delegation)
-    const containerDeIdeias = document.querySelector('.idea-list, .idea-list-container');
-    containerDeIdeias.addEventListener('click', async function(event) {
-        // Verifica se o elemento clicado (ou um parente próximo) é o botão de votar
-        const voteButton = event.target.closest('.btn-votar');
 
+    // --- 5. LÓGICA DE VOTAÇÃO ---
+    ideaListContainer.addEventListener('click', async function(event) {
+        const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
-            // Pega o ID da ideia a partir do atributo data-id do <article>
             const postArticle = voteButton.closest('.idea-post');
             const ideaId = postArticle.dataset.id;
-
             try {
-                const response = await fetch(`/api/ideias/${ideaId}/votar`, {
+                const response = await fetch(`/api/ideias/${ideaId}/votar?usuarioId=${usuarioLogado.id}`, {
                     method: 'POST'
                 });
 
-                if (!response.ok) {
-                    throw new Error('Não foi possível registrar o voto.');
-                }
+                if (!response.ok) throw new Error('Não foi possível registrar o voto.');
 
                 const ideiaAtualizada = await response.json();
 
                 // Atualiza o número de votos na tela em tempo real
                 const votesSpan = postArticle.querySelector('.votes');
                 votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
+
+                // Nota: Não precisamos recarregar os stats ou a lista de mais votadas aqui,
+                // pois esses elementos não existem na página Explorar.
 
             } catch (error) {
                 console.error('Erro ao votar:', error);
@@ -106,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Inicia o carregamento das ideias
+    // --- 6. CHAMADA INICIAL ---
+    // Inicia o carregamento das ideias assim que a página é aberta
     carregarTodasIdeias();
 });
