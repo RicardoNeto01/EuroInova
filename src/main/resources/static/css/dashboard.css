@@ -14,20 +14,36 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.main-header .logo {
+.header-column {
+    display: flex;
+    align-items: center;
+}
+
+.header-left {
+    gap: 20px; /* Espaçamento entre o botão e o logo */
+}
+
+.header-center {
+    flex-grow: 1; /* Ocupa o espaço vazio no meio */
+    display: flex;
+    justify-content: center;
+}
+
+.header-right {
+    gap: 20px; /* Espaçamento entre o perfil e o logoff */
+}
+
+.hamburger-menu {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.logo {
     font-size: 24px;
     font-weight: 700;
-    color: #0056b3;
-}
-
-.main-nav a {
-    margin: 0 15px;
-    text-decoration: none;
-    color: #555;
-    font-weight: 500;
-}
-
-.main-nav a.active {
     color: #0056b3;
 }
 
@@ -39,8 +55,66 @@ body {
 
 .user-profile .fa-user-circle {
     font-size: 24px;
-    margin-left: 10px;
+    margin-left: 10px; /* Ícone depois do nome */
 }
+
+/* --- PAINEL DE NAVEGAÇÃO LATERAL (SIDENAV) --- */
+.side-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    background-color: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transform: translateX(-100%); /* Escondido para a esquerda */
+    transition: transform 0.3s ease-in-out;
+    z-index: 1002;
+    padding-top: 20px;
+}
+
+.side-nav.show {
+    transform: translateX(0); /* Traz o menu para a visão */
+}
+
+.side-nav a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 25px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.side-nav a:hover {
+    background-color: #f4f7f6;
+}
+
+.side-nav a.active {
+    color: #0056b3;
+}
+
+/* --- OVERLAY DE FUNDO --- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none; /* Não pode ser clicado quando escondido */
+}
+
+.overlay.show {
+    opacity: 1;
+    pointer-events: auto; /* Pode ser clicado quando visível */
+}
+
 
 /* --- CONTEÚDO PRINCIPAL --- */
 .main-content {
@@ -89,8 +163,15 @@ body {
     display: flex;
     align-items: center;
     flex-grow: 1;
+    transition: all 0.3s ease;
 }
 
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    background-color: #e9f2ff;
+    cursor: pointer;
+}
 .card-icon {
     font-size: 24px;
     color: #0056b3;
@@ -213,7 +294,6 @@ body {
 
 /* --- ESTILO DO BOTÃO DE LOGOFF --- */
 .btn-logoff {
-    margin-left: 20px;
     padding: 8px 12px;
     background-color: #f4f7f6;
     border: 1px solid #ddd;
@@ -221,6 +301,8 @@ body {
     text-decoration: none;
     color: #555;
     font-weight: 500;
+    display: flex;
+    align-items: center;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 

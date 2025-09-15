@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function carregarTopIdeias() {
         const topIdeiasList = document.getElementById('top-ideas-list');
-        const MAX_TITLE_LENGTH = 30; // Define o limite máximo de caracteres para o título
+        const MAX_TITLE_LENGTH = 30;
 
         try {
             const response = await fetch('/api/dashboard/top-ideias');
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const topIdeias = await response.json();
 
-            topIdeiasList.innerHTML = ''; // Limpa a lista
+            topIdeiasList.innerHTML = '';
             if (topIdeias.length === 0) {
                 topIdeiasList.innerHTML = '<li>Nenhuma ideia votada ainda.</li>';
                 return;
@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             topIdeias.forEach((ideia, index) => {
                 let tituloExibicao = ideia.titulo;
-                // Trunca o título se for muito longo
                 if (tituloExibicao.length > MAX_TITLE_LENGTH) {
                     tituloExibicao = tituloExibicao.substring(0, MAX_TITLE_LENGTH) + '...';
                 }
@@ -158,7 +157,26 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/login.html';
     });
 
-    // --- 5. CHAMADAS INICIAIS ---
+    // --- 5. LÓGICA DO MENU LATERAL (SIDENAV) ---
+    const hamburgerBtn = document.getElementById('hamburger-menu');
+    const sideNav = document.getElementById('side-nav');
+    const overlay = document.getElementById('overlay');
+
+    function abrirMenu() {
+        sideNav.classList.add('show');
+        overlay.classList.add('show');
+    }
+
+    function fecharMenu() {
+        sideNav.classList.remove('show');
+        overlay.classList.remove('show');
+    }
+
+    hamburgerBtn.addEventListener('click', abrirMenu);
+    overlay.addEventListener('click', fecharMenu);
+
+
+    // --- 6. CHAMADAS INICIAIS ---
     carregarStats();
     carregarIdeias();
     carregarTopIdeias();
