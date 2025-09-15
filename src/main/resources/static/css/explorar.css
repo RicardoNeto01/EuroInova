@@ -1,0 +1,10 @@
+/* Ajustes para a página Explorar */
+.idea-list-container .idea-post {
+    /* Esta regra garante que os posts ocupem toda a largura da coluna principal,
+       mantendo a consistência do layout. */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* No futuro, se você quiser que a página Explorar tenha um visual
+   diferente do Dashboard, é aqui que você adicionará os novos estilos. */

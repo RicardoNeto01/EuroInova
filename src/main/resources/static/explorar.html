@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorar Ideias - EuroInova</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css"> <link rel="stylesheet" href="/css/explorar.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<nav id="side-nav" class="side-nav">
+    <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="#"><i class="fas fa-lightbulb"></i> Minhas Ideias</a>
+    <a href="/explorar.html" class="active"><i class="fas fa-search"></i> Explorar</a>
+</nav>
+<div id="overlay" class="overlay"></div>
+
+<header class="main-header">
+    <div class="header-column header-left">
+        <button id="hamburger-menu" class="hamburger-menu"><i class="fas fa-bars"></i></button>
+        <div class="logo">Eurolnova</div>
+    </div>
+    <div class="header-column header-center"></div>
+    <div class="header-column header-right">
+        <div class="user-profile">
+            <span id="nome-usuario">Carregando...</span>
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <a href="#" id="btn-logoff" class="btn-logoff">
+            <i class="fas fa-sign-out-alt"></i><span>Sair</span>
+        </a>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="page-header">
+        <h1>Explore as Ideias da Comunidade</h1>
+    </div>
+    <div class="idea-list-container">
+    </div>
+</main>
+
+<script src="/js/explorar.js"></script>
+</body>
+</html>

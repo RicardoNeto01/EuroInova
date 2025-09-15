@@ -6,6 +6,7 @@ import com.euroinova.euroinova.model.Usuario;
 import com.euroinova.euroinova.repository.IdeiaRepository;
 import com.euroinova.euroinova.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,14 @@ public class IdeiaController {
     public List<Ideia> listarIdeiasPorUsuario(@RequestParam Long usuarioId) {
         return ideiaRepository.findByUsuarioId(usuarioId);
     }
+
+    @GetMapping("/todas")
+    public List<Ideia> listarTodasOrdenado() {
+        // Usamos Sort.by para ordenar os resultados pela coluna 'id' em ordem decrescente.
+        // Como o ID é sequencial, isso efetivamente nos dá as ideias mais recentes primeiro.
+        return ideiaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    }
+
 
     @PostMapping
     public ResponseEntity<Ideia> criarIdeia(@RequestBody NovaIdeiaDTO novaIdeiaDTO, @RequestParam Long usuarioId) {
@@ -48,5 +57,5 @@ public class IdeiaController {
         return new ResponseEntity<>(ideiaSalva, HttpStatus.CREATED);
     }
 
-    // O método @PostConstruct foi removido daqui.
+
 }
