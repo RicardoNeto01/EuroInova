@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 
-@Data // Anotação do Lombok que cria getters, setters, toString, etc.
+@Data
 @Entity
 @Table(name = "usuarios")
 @AllArgsConstructor

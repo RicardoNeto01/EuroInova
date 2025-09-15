@@ -21,7 +21,7 @@ public class AutenticacaoController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Injeta o codificador de senhas que configuramos
+    private PasswordEncoder passwordEncoder;
 
     // --- NOVO ENDPOINT DE REGISTRO ---
     @PostMapping("/registrar")
@@ -53,7 +53,6 @@ public class AutenticacaoController {
     public ResponseEntity<?> autenticarUsuario(@RequestBody LoginRequest loginRequest) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailCorporativoOrRa(loginRequest.getLogin(), loginRequest.getLogin());
 
-        // A MUDANÇA ESTÁ AQUI: Usamos passwordEncoder.matches()
         // Ele compara a senha que o usuário digitou (em texto puro) com a senha
         // criptografada que está no banco de dados.
         if (usuarioOpt.isPresent() && passwordEncoder.matches(loginRequest.getSenha(), usuarioOpt.get().getSenha())) {
@@ -71,8 +70,4 @@ public class AutenticacaoController {
         private String login;
         private String senha;
     }
-
-    // O PostConstruct que criava usuários de exemplo não é mais necessário,
-    // pois agora podemos criar usuários pela própria aplicação.
-    // Mas você pode mantê-lo para testes se quiser.
 }

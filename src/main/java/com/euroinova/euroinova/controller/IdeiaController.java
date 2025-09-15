@@ -29,7 +29,7 @@ public class IdeiaController {
     @Autowired
     private VotoRepository votoRepository;
 
-    // Endpoint para a lista de ideias do dashboard do usuário
+    // Endpoint para a lista de ideias do dashboard e da página "Minhas Ideias"
     @GetMapping
     public List<Ideia> listarIdeiasPorUsuario(@RequestParam Long usuarioId) {
         return ideiaRepository.findByUsuarioId(usuarioId);
@@ -77,11 +77,9 @@ public class IdeiaController {
         Ideia ideia = ideiaOpt.get();
 
         if (votoExistente.isPresent()) {
-            // Se o voto JÁ EXISTE, remove o voto (descurtir)
             votoRepository.delete(votoExistente.get());
             ideia.setVotos(ideia.getVotos() - 1);
         } else {
-            // Se o voto NÃO EXISTE, adiciona o voto (curtir)
             Voto novoVoto = new Voto(usuarioId, ideiaId);
             votoRepository.save(novoVoto);
             ideia.setVotos(ideia.getVotos() + 1);
@@ -89,5 +87,30 @@ public class IdeiaController {
 
         Ideia ideiaAtualizada = ideiaRepository.save(ideia);
         return ResponseEntity.ok(ideiaAtualizada);
+    }
+
+    // Endpoint para atualizar uma ideia
+    @PutMapping("/{id}")
+    public ResponseEntity<Ideia> atualizarIdeia(@PathVariable Long id, @RequestBody NovaIdeiaDTO ideiaDTO) {
+        return ideiaRepository.findById(id)
+                .map(ideia -> {
+                    ideia.setTitulo(ideiaDTO.getTitulo());
+                    ideia.setDescricao(ideiaDTO.getDescricao());
+                    Ideia ideiaAtualizada = ideiaRepository.save(ideia);
+                    return ResponseEntity.ok(ideiaAtualizada);
+                }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Endpoint para deletar uma ideia
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarIdeia(@PathVariable Long id) {
+        return ideiaRepository.findById(id)
+                .map(ideia -> {
+                    // Primeiro, deletamos os votos associados para não dar erro no banco
+                    votoRepository.deleteByIdeiaId(ideia.getId());
+                    // Depois, deletamos a ideia
+                    ideiaRepository.delete(ideia);
+                    return ResponseEntity.ok().build(); // Retorna 200 OK sem corpo
+                }).orElse(ResponseEntity.notFound().build());
     }
 }

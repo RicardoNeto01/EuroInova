@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- LÓGICA DE AUTENTICAÇÃO E NOME DE USUÁRIO ---
+    // --- Lógica de Autenticação, Menu e Logoff (sem alterações) ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
     if (!usuarioLogado) {
         alert('Você precisa estar logado para acessar esta página.');
@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
-
-    // --- LÓGICA DO MENU LATERAL ---
     const hamburgerBtn = document.getElementById('hamburger-menu');
     const sideNav = document.getElementById('side-nav');
     const overlay = document.getElementById('overlay');
@@ -16,8 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function fecharMenu() { sideNav.classList.remove('show'); overlay.classList.remove('show'); }
     hamburgerBtn.addEventListener('click', abrirMenu);
     overlay.addEventListener('click', fecharMenu);
-
-    // --- LÓGICA DO BOTÃO DE LOGOFF ---
     const btnLogoff = document.getElementById('btn-logoff');
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
@@ -26,25 +22,23 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/login.html';
     });
 
-
-    // --- FUNÇÃO PRINCIPAL PARA CARREGAR AS IDEIAS DO USUÁRIO ---
+    // --- Lógica da Página "Minhas Ideias" ---
     const ideaListContainer = document.querySelector('.idea-list-container');
 
     async function carregarMinhasIdeias() {
         try {
-            // A MUDANÇA ESTÁ AQUI: Chamamos a API de ideias do usuário, não a de "todas"
             const response = await fetch(`/api/ideias?usuarioId=${usuarioLogado.id}`);
             if (!response.ok) throw new Error('Falha ao carregar suas ideias');
-
             const ideias = await response.json();
             renderizarIdeias(ideias);
         } catch (error) {
             console.error('Erro:', error);
-            ideaListContainer.innerHTML = '<p>Não foi possível carregar suas ideias. Tente novamente mais tarde.</p>';
+            ideaListContainer.innerHTML = '<p>Não foi possível carregar suas ideias.</p>';
         }
     }
 
-    // A função de renderizar e a lógica de votação são idênticas às outras páginas
+    //
+    // Renderiza as ideias com os botões de Ação
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -59,11 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="department">${ideia.departamento}</span>
                         ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
                     </div>
-                    <h3>${ideia.titulo}</h3>
-                    <p>${ideia.descricao}</p>
-                    <div class="post-footer">
-                        <span class="votes btn-votar">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
-                        <span class="comments">${ideia.comentarios} <i class="fas fa-comment"></i></span>
+                    <h3 class="ideia-titulo">${ideia.titulo}</h3>
+                    <p class="ideia-descricao">${ideia.descricao}</p>
+
+                    <div class="post-actions">
+                        <button class="btn-action btn-edit"><i class="fas fa-pencil-alt"></i> Editar</button>
+                        <button class="btn-action btn-delete"><i class="fas fa-trash"></i> Excluir</button>
                     </div>
                 </article>
             `;
@@ -71,24 +66,74 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- LÓGICA DE CLIQUE ---
     ideaListContainer.addEventListener('click', async function(event) {
-        const voteButton = event.target.closest('.btn-votar');
-        if (voteButton) {
-            const postArticle = voteButton.closest('.idea-post');
-            const ideaId = postArticle.dataset.id;
-            try {
-                const response = await fetch(`/api/ideias/${ideaId}/votar?usuarioId=${usuarioLogado.id}`, { method: 'POST' });
-                if (!response.ok) throw new Error('Não foi possível registrar o voto.');
-                const ideiaAtualizada = await response.json();
-                const votesSpan = postArticle.querySelector('.votes');
-                votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
-            } catch (error) {
-                console.error('Erro ao votar:', error);
-                alert(error.message);
+        const postArticle = event.target.closest('.idea-post');
+        if (!postArticle) return;
+        const ideaId = postArticle.dataset.id;
+
+        // Ação de Deletar
+        if (event.target.closest('.btn-delete')) {
+            if (confirm('Tem certeza que deseja excluir esta ideia? Esta ação não pode ser desfeita.')) {
+                try {
+                    const response = await fetch(`/api/ideias/${ideaId}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Falha ao excluir a ideia.');
+                    postArticle.remove();
+                    alert('Ideia excluída com sucesso.');
+                    // Recarrega os stats do dashboard, pois uma ideia foi removida
+                } catch (error) {
+                    alert(error.message);
+                }
             }
+        }
+
+        // Ação de Editar (abre o modal)
+        if (event.target.closest('.btn-edit')) {
+            const titulo = postArticle.querySelector('.ideia-titulo').textContent;
+            const descricao = postArticle.querySelector('.ideia-descricao').textContent;
+
+            document.getElementById('edit-ideia-id').value = ideaId;
+            document.getElementById('edit-ideia-titulo').value = titulo;
+            document.getElementById('edit-ideia-descricao').value = descricao;
+
+            document.getElementById('edit-ideia-modal').classList.remove('hidden');
         }
     });
 
-    // Inicia o carregamento das ideias
+    // --- LÓGICA DO MODAL DE EDIÇÃO ---
+    const editModal = document.getElementById('edit-ideia-modal');
+    const editForm = document.getElementById('edit-ideia-form');
+
+    document.getElementById('fechar-edit-modal').addEventListener('click', () => editModal.classList.add('hidden'));
+
+    editForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const id = document.getElementById('edit-ideia-id').value;
+        const data = {
+            titulo: document.getElementById('edit-ideia-titulo').value,
+            descricao: document.getElementById('edit-ideia-descricao').value
+        };
+
+        try {
+            const response = await fetch(`/api/ideias/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Falha ao atualizar a ideia.');
+
+            const ideiaAtualizada = await response.json();
+
+            const postArticle = ideaListContainer.querySelector(`[data-id="${id}"]`);
+            postArticle.querySelector('.ideia-titulo').textContent = ideiaAtualizada.titulo;
+            postArticle.querySelector('.ideia-descricao').textContent = ideiaAtualizada.descricao;
+
+            editModal.classList.add('hidden');
+            alert('Ideia atualizada com sucesso!');
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
     carregarMinhasIdeias();
 });

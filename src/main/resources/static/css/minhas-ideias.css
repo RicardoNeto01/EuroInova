@@ -1,0 +1,39 @@
+/* Container para os botões de ação */
+.post-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Estilo do botão Editar */
+.btn-edit {
+    background-color: #ffc107; /* Amarelo */
+    color: #333;
+}
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+/* Estilo do botão Excluir */
+.btn-delete {
+    background-color: #dc3545; /* Vermelho */
+    color: white;
+}
+.btn-delete:hover {
+    background-color: #c82333;
+}
