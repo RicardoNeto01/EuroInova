@@ -51,9 +51,9 @@ public class IdeiaController {
         novaIdeia.setTitulo(novaIdeiaDTO.getTitulo());
         novaIdeia.setDescricao(novaIdeiaDTO.getDescricao());
         novaIdeia.setUsuarioId(usuarioId);
-
         novaIdeia.setAutor(autor.getNome());
-        novaIdeia.setDepartamento("TI");
+        novaIdeia.setDepartamento(autor.getDepartamento());
+
         novaIdeia.setStatus("Pendente");
         novaIdeia.setVotos(0);
         novaIdeia.setComentarios(0);

@@ -37,6 +37,7 @@ public class AutenticacaoController {
         novoUsuario.setNome(registroDTO.getNome());
         novoUsuario.setRa(registroDTO.getRa());
         novoUsuario.setEmailCorporativo(registroDTO.getEmailCorporativo());
+        novoUsuario.setDepartamento(registroDTO.getDepartamento());
 
         // 3. CRIPTOGRAFA A SENHA ANTES DE SALVAR
         novoUsuario.setSenha(passwordEncoder.encode(registroDTO.getSenha()));

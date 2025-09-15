@@ -8,4 +8,5 @@ public class RegistroDTO {
     private String ra;
     private String emailCorporativo;
     private String senha;
+    private String departamento;
 }

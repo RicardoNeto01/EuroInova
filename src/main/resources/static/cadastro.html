@@ -10,7 +10,7 @@
 <body>
 <div class="login-container">
     <div class="logo">Eurolnova</div>
-    <h2 style="font-weight: 500; margin-bottom: 25px;">Crie sua Conta</h2>
+    <h2>Crie sua Conta</h2>
 
     <form id="registroForm">
         <div class="form-group">
@@ -22,6 +22,18 @@
         <div class="form-group">
             <input type="email" id="email" placeholder="E-mail Corporativo" required>
         </div>
+
+        <div class="form-group">
+            <select id="departamento" required>
+                <option value="" disabled selected>Selecione seu Departamento</option>
+                <option value="TI">Tecnologia da Informação</option>
+                <option value="Marketing">Marketing</option>
+                <option value="RH">Recursos Humanos</option>
+                <option value="Financeiro">Financeiro</option>
+                <option value="Operações">Operações</option>
+            </select>
+        </div>
+
         <div class="form-group">
             <input type="password" id="senha" placeholder="Senha" required>
         </div>
@@ -31,7 +43,7 @@
 
         <button type="submit" class="btn-login">Cadastrar-se</button>
 
-        <div class="signup-link" style="margin-top: 20px;">
+        <div class="signup-link">
             Já tem uma conta? <a href="/login.html">Entrar</a>
         </div>
     </form>

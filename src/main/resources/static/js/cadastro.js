@@ -9,13 +9,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const nome = document.getElementById('nome').value;
         const ra = document.getElementById('ra').value;
         const email = document.getElementById('email').value;
+        const departamento = document.getElementById('departamento').value;
         const senha = document.getElementById('senha').value;
         const confirmarSenha = document.getElementById('confirmarSenha').value;
 
         // 1. Validação no front-end: Verifica se as senhas coincidem
         if (senha !== confirmarSenha) {
             alert('As senhas não coincidem! Por favor, verifique.');
-            return; // Para a execução se as senhas forem diferentes
+            return;
+        }
+
+        // Validação para garantir que um departamento foi selecionado
+        if (!departamento) {
+            alert('Por favor, selecione um departamento.');
+            return;
         }
 
         // 2. Monta o objeto de dados para enviar à API
@@ -23,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             nome: nome,
             ra: ra,
             emailCorporativo: email,
+            departamento: departamento,
             senha: senha
         };
 
@@ -42,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(responseBody); // Mostra "Usuário registrado com sucesso!"
                 window.location.href = '/login.html'; // Redireciona para a página de login
             } else {
-                // Se der erro (ex: 409 Conflict), mostra a mensagem vinda do back-end
+
                 alert('Erro no cadastro: ' + responseBody);
             }
         } catch (error) {
