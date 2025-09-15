@@ -57,5 +57,20 @@ public class IdeiaController {
         return new ResponseEntity<>(ideiaSalva, HttpStatus.CREATED);
     }
 
+    @PostMapping("/{id}/votar")
+    public ResponseEntity<Ideia> votarNaIdeia(@PathVariable Long id) {
+        // 1. Encontra a ideia no banco de dados pelo ID
+        return ideiaRepository.findById(id)
+                .map(ideia -> {
+                    // 2. Incrementa o contador de votos
+                    ideia.setVotos(ideia.getVotos() + 1);
+                    // 3. Salva a ideia atualizada de volta no banco
+                    Ideia ideiaAtualizada = ideiaRepository.save(ideia);
+                    // 4. Retorna a ideia com o novo número de votos
+                    return ResponseEntity.ok(ideiaAtualizada);
+                })
+                // Se não encontrar a ideia, retorna um erro 404 Not Found
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 }

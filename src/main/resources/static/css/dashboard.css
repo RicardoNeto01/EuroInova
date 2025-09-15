@@ -395,3 +395,12 @@ body {
     cursor: pointer;
     font-weight: 500;
 }
+/* Torna a área de votos clicável */
+.post-footer .votes {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.post-footer .votes:hover {
+    color: #0056b3;
+}

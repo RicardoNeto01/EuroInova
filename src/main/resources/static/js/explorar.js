@@ -45,16 +45,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // A função de renderizar é a mesma do dashboard
+
     function renderizarIdeias(ideias) {
-        ideaListContainer.innerHTML = '';
+        const container = ideaListContainer || document.querySelector('.idea-list-container');
+
+        container.innerHTML = '';
         if (ideias.length === 0) {
-            ideaListContainer.innerHTML = '<p>Nenhuma ideia foi enviada ainda.</p>';
+            container.innerHTML = '<p>Nenhuma ideia foi enviada ainda.</p>';
             return;
         }
         ideias.forEach(ideia => {
             const postHTML = `
-                <article class="idea-post ${ideia.status === 'Aprovada' ? 'approved' : ''}">
+                <article class="idea-post ${ideia.status === 'Aprovada' ? 'approved' : ''}" data-id="${ideia.id}">
                     <div class="post-header">
                         <span class="author">${ideia.autor}</span>
                         <span class="department">${ideia.departamento}</span>
@@ -63,14 +65,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h3>${ideia.titulo}</h3>
                     <p>${ideia.descricao}</p>
                     <div class="post-footer">
-                        <span class="votes">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
+                        <span class="votes btn-votar">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
                         <span class="comments">${ideia.comentarios} <i class="fas fa-comment"></i></span>
                     </div>
                 </article>
             `;
-            ideaListContainer.insertAdjacentHTML('beforeend', postHTML);
+            container.insertAdjacentHTML('beforeend', postHTML);
         });
     }
+    // Lógica para escutar cliques na lista de ideias (Event Delegation)
+    const containerDeIdeias = document.querySelector('.idea-list, .idea-list-container');
+    containerDeIdeias.addEventListener('click', async function(event) {
+        // Verifica se o elemento clicado (ou um parente próximo) é o botão de votar
+        const voteButton = event.target.closest('.btn-votar');
+
+        if (voteButton) {
+            // Pega o ID da ideia a partir do atributo data-id do <article>
+            const postArticle = voteButton.closest('.idea-post');
+            const ideaId = postArticle.dataset.id;
+
+            try {
+                const response = await fetch(`/api/ideias/${ideaId}/votar`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Não foi possível registrar o voto.');
+                }
+
+                const ideiaAtualizada = await response.json();
+
+                // Atualiza o número de votos na tela em tempo real
+                const votesSpan = postArticle.querySelector('.votes');
+                votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
+
+            } catch (error) {
+                console.error('Erro ao votar:', error);
+                alert(error.message);
+            }
+        }
+    });
 
     // Inicia o carregamento das ideias
     carregarTodasIdeias();
