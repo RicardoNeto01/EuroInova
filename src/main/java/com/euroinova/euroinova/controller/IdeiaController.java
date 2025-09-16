@@ -13,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ideias")
@@ -46,11 +48,35 @@ public class IdeiaController {
 
     // Endpoint para a página "Explorar"
     @GetMapping("/todas")
-    public List<Ideia> listarTodasOrdenado(@RequestParam Long usuarioId) {
-        List<Ideia> todasIdeias = ideiaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-        // Para cada ideia, verifica se o usuário votou
-        marcarIdeiasVotadas(usuarioId, todasIdeias);
-        return todasIdeias;
+    public List<Ideia> listarTodasOrdenado(
+            @RequestParam Long usuarioId,
+            @RequestParam(required = false, defaultValue = "recentes") String ordenarPor,
+            @RequestParam(required = false) String departamento) {
+
+        // 1. Busca todas as ideias
+        List<Ideia> todasIdeias = ideiaRepository.findAll();
+
+        // 2. Filtra por departamento, se um for fornecido
+        List<Ideia> ideiasFiltradas;
+        if (departamento != null && !departamento.isEmpty() && !departamento.equals("Todos")) {
+            ideiasFiltradas = todasIdeias.stream()
+                    .filter(ideia -> departamento.equals(ideia.getDepartamento()))
+                    .collect(Collectors.toList());
+        } else {
+            ideiasFiltradas = todasIdeias;
+        }
+
+        // 3. Ordena a lista filtrada
+        if ("votos".equals(ordenarPor)) {
+            ideiasFiltradas.sort(Comparator.comparingInt(Ideia::getVotos).reversed());
+        } else {
+            ideiasFiltradas.sort(Comparator.comparingLong(Ideia::getId).reversed());
+        }
+
+        // 4. Marca as ideias que o usuário atual já votou
+        marcarIdeiasVotadas(usuarioId, ideiasFiltradas);
+
+        return ideiasFiltradas;
     }
 
     // Endpoint para criar uma nova ideia

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. LÓGICA DE AUTENTICAÇÃO E NOME DE USUÁRIO ---
+    // --- 1. LÓGICA DE AUTENTICAÇÃO, MENU E LOGOFF ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
     if (!usuarioLogado) {
         alert('Você precisa estar logado para acessar esta página.');
@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
 
-    // --- 2. LÓGICA DO MENU LATERAL (SIDENAV) ---
     const hamburgerBtn = document.getElementById('hamburger-menu');
     const sideNav = document.getElementById('side-nav');
     const overlay = document.getElementById('overlay');
@@ -17,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     hamburgerBtn.addEventListener('click', abrirMenu);
     overlay.addEventListener('click', fecharMenu);
 
-    // --- 3. LÓGICA DO BOTÃO DE LOGOFF ---
     const btnLogoff = document.getElementById('btn-logoff');
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
@@ -27,13 +25,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    // --- 4. FUNÇÃO PRINCIPAL PARA CARREGAR TODAS AS IDEIAS ---
+    // --- 2. LÓGICA DA PÁGINA EXPLORAR COM FILTROS ---
     const ideaListContainer = document.querySelector('.idea-list-container');
+    const departmentFilterSelect = document.getElementById('filter-department');
+    const sortOptionsContainer = document.querySelector('.sort-options');
+    const sortButtons = document.querySelectorAll('.sort-btn');
 
-    async function carregarTodasIdeias() {
+    // Função principal que busca os dados da API com base nos filtros selecionados
+    async function carregarIdeias() {
+        // Encontra o botão de ordenação que está ativo para saber o valor
+        const activeSortButton = document.querySelector('.sort-btn.active');
+        const ordenarPor = activeSortButton.dataset.sort;
+        const departamento = departmentFilterSelect.value;
+
+        // Monta a URL da API dinamicamente com os parâmetros
+        const url = new URL('/api/ideias/todas', window.location.origin);
+        url.searchParams.append('usuarioId', usuarioLogado.id);
+        url.searchParams.append('ordenarPor', ordenarPor);
+        if (departamento && departamento !== 'Todos') {
+            url.searchParams.append('departamento', departamento);
+        }
+
         try {
-            // Envia o ID do usuário para o back-end saber o status de voto de cada ideia
-            const response = await fetch(`/api/ideias/todas?usuarioId=${usuarioLogado.id}`);
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Falha ao carregar ideias');
 
             const ideias = await response.json();
@@ -48,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
-            ideaListContainer.innerHTML = '<p>Nenhuma ideia foi enviada ainda na plataforma.</p>';
+            ideaListContainer.innerHTML = '<p>Nenhuma ideia encontrada com os filtros selecionados.</p>';
             return;
         }
         ideias.forEach(ideia => {
@@ -71,28 +85,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- 5. LÓGICA DE VOTAÇÃO ---
+    // Lógica de Votação
     ideaListContainer.addEventListener('click', async function(event) {
         const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
             const postArticle = voteButton.closest('.idea-post');
             const ideaId = postArticle.dataset.id;
             try {
-                const response = await fetch(`/api/ideias/${ideaId}/votar?usuarioId=${usuarioLogado.id}`, {
-                    method: 'POST'
-                });
-
+                const response = await fetch(`/api/ideias/${ideaId}/votar?usuarioId=${usuarioLogado.id}`, { method: 'POST' });
                 if (!response.ok) throw new Error('Não foi possível registrar o voto.');
 
                 const ideiaAtualizada = await response.json();
 
-                // Atualiza o número de votos na tela em tempo real
                 const votesSpan = postArticle.querySelector('.votes');
                 votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
 
-                // Alterna a classe '.voted' para a cor do ícone mudar
                 voteButton.classList.toggle('voted');
-
             } catch (error) {
                 console.error('Erro ao votar:', error);
                 alert(error.message);
@@ -100,6 +108,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- 6. CHAMADA INICIAL ---
-    carregarTodasIdeias();
+    // --- 3. EVENT LISTENERS PARA OS FILTROS ---
+    // Recarrega as ideias quando o filtro de departamento for alterado
+    departmentFilterSelect.addEventListener('change', carregarIdeias);
+
+    // Adiciona a lógica de clique para os botões de ordenação
+    sortButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove a classe 'active' do botão que estava ativo
+            sortOptionsContainer.querySelector('.active').classList.remove('active');
+            // Adiciona a classe 'active' ao botão clicado
+            button.classList.add('active');
+            // Recarrega as ideias com a nova ordenação
+            carregarIdeias();
+        });
+    });
+
+    // --- 4. CHAMADA INICIAL ---
+    // Carrega as ideias com os filtros padrão assim que a página é aberta
+    carregarIdeias();
 });

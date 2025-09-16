@@ -1,10 +1,88 @@
-/* Ajustes para a página Explorar */
+/* --- ESTILOS DOS FILTROS --- */
+.filters-container {
+    margin-bottom: 30px;
+    padding: 20px 25px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #eef2f5;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eef2f5;
+}
+
+.filter-header .fa-filter {
+    color: #0056b3;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.filter-options {
+    display: flex;
+    gap: 30px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+}
+
+.filter-group select {
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    background-color: #f8f9fa;
+}
+
+/* Estilo dos novos botões de ordenação */
+.sort-options {
+    display: flex;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.sort-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    background-color: transparent;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.2s ease-in-out;
+}
+
+.sort-btn.active {
+    background-color: #fff;
+    color: #0056b3;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Estilos gerais da página */
 .idea-list-container .idea-post {
-    /* Esta regra garante que os posts ocupem toda a largura da coluna principal,
-       mantendo a consistência do layout. */
     width: 100%;
     box-sizing: border-box;
 }
-
-/* No futuro, se você quiser que a página Explorar tenha um visual
-   diferente do Dashboard, é aqui que você adicionará os novos estilos. */
