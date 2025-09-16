@@ -32,13 +32,25 @@ public class IdeiaController {
     // Endpoint para a lista de ideias do dashboard e da página "Minhas Ideias"
     @GetMapping
     public List<Ideia> listarIdeiasPorUsuario(@RequestParam Long usuarioId) {
-        return ideiaRepository.findByUsuarioId(usuarioId);
+        List<Ideia> ideias = ideiaRepository.findByUsuarioId(usuarioId);
+        // Para cada ideia, verifica se o usuário votou
+        marcarIdeiasVotadas(usuarioId, ideias);
+        return ideias;
+    }
+    private void marcarIdeiasVotadas(Long usuarioId, List<Ideia> ideias) {
+        for (Ideia ideia : ideias) {
+            boolean votado = votoRepository.findByUsuarioIdAndIdeiaId(usuarioId, ideia.getId()).isPresent();
+            ideia.setVotadoPeloUsuarioAtual(votado);
+        }
     }
 
     // Endpoint para a página "Explorar"
     @GetMapping("/todas")
-    public List<Ideia> listarTodasOrdenado() {
-        return ideiaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public List<Ideia> listarTodasOrdenado(@RequestParam Long usuarioId) {
+        List<Ideia> todasIdeias = ideiaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+        // Para cada ideia, verifica se o usuário votou
+        marcarIdeiasVotadas(usuarioId, todasIdeias);
+        return todasIdeias;
     }
 
     // Endpoint para criar uma nova ideia

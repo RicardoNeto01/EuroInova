@@ -20,7 +20,8 @@ public class Ideia {
     private int votos;
     private int comentarios;
 
-    // --- NOVA LINHA ---
     // Guarda o ID do usuário que criou a ideia
     private Long usuarioId;
+    @Transient // Esta anotação diz ao JPA para NÃO criar esta coluna no banco de dados
+    private boolean votadoPeloUsuarioAtual;
 }

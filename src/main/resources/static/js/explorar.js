@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function carregarTodasIdeias() {
         try {
-            // Chama o endpoint que busca todas as ideias de todos os usuários
-            const response = await fetch('/api/ideias/todas');
+            // Envia o ID do usuário para o back-end saber o status de voto de cada ideia
+            const response = await fetch(`/api/ideias/todas?usuarioId=${usuarioLogado.id}`);
             if (!response.ok) throw new Error('Falha ao carregar ideias');
 
             const ideias = await response.json();
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // A função de renderizar é a mesma do dashboard, para manter o visual
+    // Função que "desenha" as ideias na tela
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h3>${ideia.titulo}</h3>
                     <p>${ideia.descricao}</p>
                     <div class="post-footer">
-                        <span class="votes btn-votar">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
+                        <span class="votes btn-votar ${ideia.votadoPeloUsuarioAtual ? 'voted' : ''}">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
                         <span class="comments">${ideia.comentarios} <i class="fas fa-comment"></i></span>
                     </div>
                 </article>
@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const votesSpan = postArticle.querySelector('.votes');
                 votesSpan.innerHTML = `${ideiaAtualizada.votos} <i class="fas fa-thumbs-up"></i>`;
 
-                // Nota: Não precisamos recarregar os stats ou a lista de mais votadas aqui,
-                // pois esses elementos não existem na página Explorar.
+                // Alterna a classe '.voted' para a cor do ícone mudar
+                voteButton.classList.toggle('voted');
 
             } catch (error) {
                 console.error('Erro ao votar:', error);
@@ -101,6 +101,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- 6. CHAMADA INICIAL ---
-    // Inicia o carregamento das ideias assim que a página é aberta
     carregarTodasIdeias();
 });
