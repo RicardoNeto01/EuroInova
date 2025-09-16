@@ -6,50 +6,61 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/login.html';
         return;
     }
-    document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
 
-    const hamburgerBtn = document.getElementById('hamburger-menu');
-    const sideNav = document.getElementById('side-nav');
-    const overlay = document.getElementById('overlay');
-    function abrirMenu() { sideNav.classList.add('show'); overlay.classList.add('show'); }
-    function fecharMenu() { sideNav.classList.remove('show'); overlay.classList.remove('show'); }
-    hamburgerBtn.addEventListener('click', abrirMenu);
-    overlay.addEventListener('click', fecharMenu);
+    // Como o cabeçalho é o mesmo, injetamos ele e sua lógica aqui
+    const headerContainer = document.querySelector('.main-header');
+    if (headerContainer) {
+        headerContainer.innerHTML = `
+            <div class="header-column header-left">
+                <button id="hamburger-menu" class="hamburger-menu"><i class="fas fa-bars"></i></button>
+                <div class="logo">Eurolnova</div>
+            </div>
+            <div class="header-column header-center"></div>
+            <div class="header-column header-right">
+                <div class="user-profile">
+                    <span id="nome-usuario">${usuarioLogado.nome}</span>
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <a href="#" id="btn-logoff" class="btn-logoff"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
+            </div>
+        `;
 
-    const btnLogoff = document.getElementById('btn-logoff');
-    btnLogoff.addEventListener('click', function(event) {
-        event.preventDefault();
-        localStorage.removeItem('usuarioLogado');
-        alert('Você saiu com sucesso!');
-        window.location.href = '/login.html';
-    });
+        // Ativa a lógica do menu e logoff no cabeçalho recém-criado
+        const hamburgerBtn = document.getElementById('hamburger-menu');
+        const sideNav = document.getElementById('side-nav');
+        const overlay = document.getElementById('overlay');
+        function abrirMenu() { sideNav.classList.add('show'); overlay.classList.add('show'); }
+        function fecharMenu() { sideNav.classList.remove('show'); overlay.classList.remove('show'); }
+        hamburgerBtn.addEventListener('click', abrirMenu);
+        overlay.addEventListener('click', fecharMenu);
 
+        const btnLogoff = document.getElementById('btn-logoff');
+        btnLogoff.addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('usuarioLogado');
+            window.location.href = '/login.html';
+        });
+    }
 
     // --- 2. LÓGICA DA PÁGINA EXPLORAR COM FILTROS ---
     const ideaListContainer = document.querySelector('.idea-list-container');
+    const sortButtons = document.querySelectorAll('.sort-btn'); // Procura pelos botões
     const departmentFilterSelect = document.getElementById('filter-department');
-    const sortOptionsContainer = document.querySelector('.sort-options');
-    const sortButtons = document.querySelectorAll('.sort-btn');
 
-    // Função principal que busca os dados da API com base nos filtros selecionados
-    async function carregarIdeias() {
+    async function carregarTodasIdeias() {
         // Encontra o botão de ordenação que está ativo para saber o valor
         const activeSortButton = document.querySelector('.sort-btn.active');
-        const ordenarPor = activeSortButton.dataset.sort;
+        const ordenarPor = activeSortButton ? activeSortButton.dataset.sort : 'recentes';
         const departamento = departmentFilterSelect.value;
-
-        // Monta a URL da API dinamicamente com os parâmetros
         const url = new URL('/api/ideias/todas', window.location.origin);
         url.searchParams.append('usuarioId', usuarioLogado.id);
         url.searchParams.append('ordenarPor', ordenarPor);
         if (departamento && departamento !== 'Todos') {
             url.searchParams.append('departamento', departamento);
         }
-
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Falha ao carregar ideias');
-
             const ideias = await response.json();
             renderizarIdeias(ideias);
         } catch (error) {
@@ -58,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Função que "desenha" as ideias na tela
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -73,8 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="department">${ideia.departamento}</span>
                         ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
                     </div>
-                    <h3>${ideia.titulo}</h3>
-                    <p>${ideia.descricao}</p>
+                    <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>
+                    <p class="ideia-descricao">${ideia.descricao}</p>
                     <div class="post-footer">
                         <span class="votes btn-votar ${ideia.votadoPeloUsuarioAtual ? 'voted' : ''}">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
                         <span class="comments">${ideia.comentarios} <i class="fas fa-comment"></i></span>
@@ -85,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Lógica de Votação
     ideaListContainer.addEventListener('click', async function(event) {
         const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
@@ -109,22 +118,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- 3. EVENT LISTENERS PARA OS FILTROS ---
-    // Recarrega as ideias quando o filtro de departamento for alterado
-    departmentFilterSelect.addEventListener('change', carregarIdeias);
+    departmentFilterSelect.addEventListener('change', carregarTodasIdeias);
 
-    // Adiciona a lógica de clique para os botões de ordenação
     sortButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove a classe 'active' do botão que estava ativo
-            sortOptionsContainer.querySelector('.active').classList.remove('active');
-            // Adiciona a classe 'active' ao botão clicado
+            document.querySelector('.sort-btn.active').classList.remove('active');
             button.classList.add('active');
-            // Recarrega as ideias com a nova ordenação
-            carregarIdeias();
+            carregarTodasIdeias();
         });
     });
 
     // --- 4. CHAMADA INICIAL ---
-    // Carrega as ideias com os filtros padrão assim que a página é aberta
-    carregarIdeias();
+    carregarTodasIdeias();
 });

@@ -1,0 +1,105 @@
+#ideia-detalhe-container {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.07);
+}
+
+.ideia-detalhe-titulo {
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.ideia-detalhe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.ideia-detalhe-meta span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ideia-detalhe-descricao {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #333;
+    white-space: pre-wrap;
+}
+/* --- ESTILOS DA SEÇÃO DE COMENTÁRIOS --- */
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.btn-submit-comment {
+    align-self: flex-end;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.comment-item {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #eef2f5;
+}
+
+.comment-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.comment-author {
+    font-weight: 700;
+    color: #333;
+}
+
+.comment-date {
+    font-size: 12px;
+    color: #888;
+}
+
+.comment-body {
+    color: #555;
+    line-height: 1.6;
+}

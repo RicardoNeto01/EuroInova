@@ -411,3 +411,14 @@ body {
     color: #0056b3;
     font-weight: 700;
 }
+/* --- Estilo para os títulos das ideias que agora são links --- */
+.ideia-titulo-link {
+    text-decoration: none;
+    color: inherit; /* Herda a cor preta do h3 */
+    transition: color 0.2s ease;
+}
+
+.ideia-titulo-link:hover {
+    color: #0056b3; /* Fica azul ao passar o mouse */
+    text-decoration: underline;
+}

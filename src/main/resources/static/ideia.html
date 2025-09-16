@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Ideia - EuroInova</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css"> <link rel="stylesheet" href="/css/ideia.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<nav id="side-nav" class="side-nav">
+    <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="/minhas-ideias.html"><i class="fas fa-lightbulb"></i> Minhas Ideias</a>
+    <a href="/explorar.html"><i class="fas fa-search"></i> Explorar</a>
+</nav>
+<div id="overlay" class="overlay"></div>
+
+<header class="main-header">
+</header>
+
+<main class="main-content">
+    <div id="ideia-detalhe-container">
+        <p>Carregando detalhes da ideia...</p>
+    </div>
+
+    <div id="comentarios-container" style="margin-top: 40px;">
+        <h2>Comentários</h2>
+
+        <form id="novo-comentario-form" class="comment-form">
+            <textarea id="comentario-texto" placeholder="Deixe seu comentário..." required rows="3"></textarea>
+            <button type="submit" class="btn-submit-comment">Enviar Comentário</button>
+        </form>
+
+        <div id="lista-comentarios" class="comment-list">
+        </div>
+    </div>
+</main>
+
+<script src="/js/ideia.js"></script>
+</body>
+</html>

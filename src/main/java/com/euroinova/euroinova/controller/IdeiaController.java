@@ -31,6 +31,23 @@ public class IdeiaController {
     @Autowired
     private VotoRepository votoRepository;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Ideia> buscarIdeiaPorId(@PathVariable Long id, @RequestParam Long usuarioId) {
+        // Busca a ideia no repositório pelo ID
+        Optional<Ideia> ideiaOpt = ideiaRepository.findById(id);
+
+        if (ideiaOpt.isPresent()) {
+            Ideia ideia = ideiaOpt.get();
+            // Verifica se o usuário logado já votou nesta ideia
+            boolean votado = votoRepository.findByUsuarioIdAndIdeiaId(usuarioId, ideia.getId()).isPresent();
+            ideia.setVotadoPeloUsuarioAtual(votado);
+            return ResponseEntity.ok(ideia);
+        } else {
+            // Se não encontrar a ideia, retorna um erro "Não Encontrado" (404)
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // Endpoint para a lista de ideias do dashboard e da página "Minhas Ideias"
     @GetMapping
     public List<Ideia> listarIdeiasPorUsuario(@RequestParam Long usuarioId) {

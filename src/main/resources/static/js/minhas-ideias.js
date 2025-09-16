@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Lógica de Autenticação, Menu e Logoff (sem alterações) ---
+    // --- LÓGICA DE AUTENTICAÇÃO, MENU E LOGOFF ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
     if (!usuarioLogado) {
         alert('Você precisa estar logado para acessar esta página.');
@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
+
     const hamburgerBtn = document.getElementById('hamburger-menu');
     const sideNav = document.getElementById('side-nav');
     const overlay = document.getElementById('overlay');
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function fecharMenu() { sideNav.classList.remove('show'); overlay.classList.remove('show'); }
     hamburgerBtn.addEventListener('click', abrirMenu);
     overlay.addEventListener('click', fecharMenu);
+
     const btnLogoff = document.getElementById('btn-logoff');
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
@@ -22,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/login.html';
     });
 
-    // --- Lógica da Página "Minhas Ideias" ---
+
+    // --- LÓGICA DA PÁGINA "MINHAS IDEIAS" ---
     const ideaListContainer = document.querySelector('.idea-list-container');
 
     async function carregarMinhasIdeias() {
@@ -37,8 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    //
-    // Renderiza as ideias com os botões de Ação
+    // Função de renderização com os títulos como links e botões de ação
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -53,7 +55,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="department">${ideia.departamento}</span>
                         ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
                     </div>
-                    <h3 class="ideia-titulo">${ideia.titulo}</h3>
+
+                    <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>
+
                     <p class="ideia-descricao">${ideia.descricao}</p>
 
                     <div class="post-actions">
@@ -66,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- LÓGICA DE CLIQUE ---
+    // --- LÓGICA DE CLIQUE PARA AÇÕES (EDITAR, EXCLUIR) ---
     ideaListContainer.addEventListener('click', async function(event) {
         const postArticle = event.target.closest('.idea-post');
         if (!postArticle) return;
@@ -80,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!response.ok) throw new Error('Falha ao excluir a ideia.');
                     postArticle.remove();
                     alert('Ideia excluída com sucesso.');
-                    // Recarrega os stats do dashboard, pois uma ideia foi removida
                 } catch (error) {
                     alert(error.message);
                 }
@@ -89,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Ação de Editar (abre o modal)
         if (event.target.closest('.btn-edit')) {
-            const titulo = postArticle.querySelector('.ideia-titulo').textContent;
+            const titulo = postArticle.querySelector('.ideia-titulo-link').textContent;
             const descricao = postArticle.querySelector('.ideia-descricao').textContent;
 
             document.getElementById('edit-ideia-id').value = ideaId;
@@ -125,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const ideiaAtualizada = await response.json();
 
             const postArticle = ideaListContainer.querySelector(`[data-id="${id}"]`);
-            postArticle.querySelector('.ideia-titulo').textContent = ideiaAtualizada.titulo;
+            postArticle.querySelector('.ideia-titulo-link').textContent = ideiaAtualizada.titulo;
             postArticle.querySelector('.ideia-descricao').textContent = ideiaAtualizada.descricao;
 
             editModal.classList.add('hidden');
@@ -135,5 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // --- CHAMADA INICIAL ---
     carregarMinhasIdeias();
 });

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
     document.getElementById('mensagem-boas-vindas').textContent = `Bem-vindo(a) de volta, ${usuarioLogado.nome}!`;
 
+    const mainColumn = document.querySelector('.main-column');
     const ideaListContainer = document.querySelector('.idea-list');
 
     // --- 2. FUNÇÕES PARA CARREGAR DADOS DINÂMICOS DA API ---
@@ -57,8 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="department">${ideia.departamento}</span>
                         ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
                     </div>
-                    <h3>${ideia.titulo}</h3>
-                    <p>${ideia.descricao}</p>
+
+                    <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>
+
+                    <p class="ideia-descricao">${ideia.descricao}</p>
                     <div class="post-footer">
                         <span class="votes btn-votar ${ideia.votadoPeloUsuarioAtual ? 'voted' : ''}">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
                         <span class="comments">${ideia.comentarios} <i class="fas fa-comment"></i></span>
@@ -102,8 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- 3. LÓGICA DE VOTAÇÃO ---
-    ideaListContainer.addEventListener('click', async function(event) {
+    // --- 3. LÓGICA DE CLIQUE (APENAS VOTO) ---
+    mainColumn.addEventListener('click', async function(event) {
         const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
             const postArticle = voteButton.closest('.idea-post');
