@@ -1,7 +1,9 @@
 package com.euroinova.euroinova.controller;
 
 import com.euroinova.euroinova.model.Ideia;
+import com.euroinova.euroinova.repository.ComentarioRepository;
 import com.euroinova.euroinova.repository.IdeiaRepository;
+import com.euroinova.euroinova.repository.VotoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,12 @@ public class AdminController {
 
     @Autowired
     private IdeiaRepository ideiaRepository;
+
+    @Autowired
+    private VotoRepository votoRepository;
+
+    @Autowired
+    private ComentarioRepository comentarioRepository;
 
     // Endpoint para a tabela de gerenciamento de ideias
     @GetMapping("/ideias")
@@ -60,6 +68,19 @@ public class AdminController {
                     ideia.setStatus(novoStatus);
                     Ideia ideiaAtualizada = ideiaRepository.save(ideia);
                     return ResponseEntity.ok(ideiaAtualizada);
+                }).orElse(ResponseEntity.notFound().build());
+    }
+    @DeleteMapping("/ideias/{id}")
+    public ResponseEntity<?> deletarIdeia(@PathVariable Long id) {
+        return ideiaRepository.findById(id)
+                .map(ideia -> {
+                    // 1. Exclui todos os votos associados
+                    votoRepository.deleteByIdeiaId(id);
+                    // 2. Exclui todos os comentários associados
+                    comentarioRepository.deleteByIdeiaId(id);
+                    // 3. Exclui a ideia
+                    ideiaRepository.delete(ideia);
+                    return ResponseEntity.ok().build(); // Retorna 200 OK sem corpo
                 }).orElse(ResponseEntity.notFound().build());
     }
 }

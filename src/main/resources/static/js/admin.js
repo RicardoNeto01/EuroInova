@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // --- LÓGICA DA PÁGINA DE ADMIN ---
+    let ideaIdToDelete = null; // Variável global para guardar o ID da ideia a ser excluída
 
     async function renderStatusChart() {
         try {
@@ -52,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const data = await response.json();
             const ctx = document.getElementById('statusPieChart').getContext('2d');
 
-            // Destrói o gráfico anterior, se existir, para evitar sobreposição
             if (window.myStatusChart instanceof Chart) {
                 window.myStatusChart.destroy();
             }
@@ -119,6 +119,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                                 <option value="Aprovada" ${ideia.status === 'Aprovada' ? 'selected' : ''}>Aprovada</option>
                                 <option value="Rejeitada" ${ideia.status === 'Rejeitada' ? 'selected' : ''}>Rejeitada</option>
                             </select>
+                            <button class="btn-delete-admin" title="Excluir Ideia">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -132,8 +135,52 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // --- LÓGICA PARA MUDANÇA DE STATUS ---
+    // --- LÓGICA PARA MUDANÇA DE STATUS E EXCLUSÃO ---
     const tableContainer = document.querySelector('.management-table-container');
+    const confirmDeleteModal = document.getElementById('confirm-delete-modal');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+
+    // Evento para cliques (para abrir o modal de exclusão)
+    tableContainer.addEventListener('click', function(event) {
+        const deleteButton = event.target.closest('.btn-delete-admin');
+        if (deleteButton) {
+            const row = deleteButton.closest('tr');
+            ideaIdToDelete = row.dataset.id; // Guarda o ID da ideia a ser excluída
+            confirmDeleteModal.classList.remove('hidden'); // Abre o modal
+        }
+    });
+
+    // Evento para fechar o modal
+    btnCancelDelete.addEventListener('click', () => {
+        confirmDeleteModal.classList.add('hidden');
+        ideaIdToDelete = null; // Limpa o ID guardado
+    });
+
+    // Evento para confirmar a exclusão
+    btnConfirmDelete.addEventListener('click', async () => {
+        if (!ideaIdToDelete) return;
+
+        try {
+            const response = await fetch(`/api/admin/ideias/${ideaIdToDelete}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Falha ao excluir a ideia.');
+
+            const row = tableContainer.querySelector(`tr[data-id="${ideaIdToDelete}"]`);
+            if (row) row.remove();
+
+            alert('Ideia excluída com sucesso.');
+
+            renderStatusChart();
+            renderGlobalStats();
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            confirmDeleteModal.classList.add('hidden');
+            ideaIdToDelete = null;
+        }
+    });
+
+    // Evento para mudanças no select de status
     tableContainer.addEventListener('change', async function(event) {
         if (event.target.classList.contains('status-select')) {
             const selectElement = event.target;
@@ -152,7 +199,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 row.querySelector('.status-cell').textContent = novoStatus;
 
-                // ATUALIZA O GRÁFICO DE PIZZA EM TEMPO REAL
                 renderStatusChart();
 
                 alert('Status da ideia atualizado com sucesso!');

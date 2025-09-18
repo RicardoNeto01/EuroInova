@@ -15,8 +15,6 @@
 
 <nav id="side-nav" class="side-nav">
     <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="/minhas-ideias.html"><i class="fas fa-lightbulb"></i> Minhas Ideias</a>
-    <a href="/explorar.html"><i class="fas fa-search"></i> Explorar</a>
 </nav>
 <div id="overlay" class="overlay"></div>
 
@@ -75,6 +73,16 @@
         </table>
     </div>
 
+    <div id="confirm-delete-modal" class="modal-overlay hidden">
+        <div class="modal-content confirm-modal">
+            <h3>Confirmar Exclusão</h3>
+            <p>Você tem certeza que deseja excluir esta ideia permanentemente? Esta ação não pode ser desfeita.</p>
+            <div class="confirm-actions">
+                <button id="btn-cancel-delete" class="btn-action btn-secondary">Cancelar</button>
+                <button id="btn-confirm-delete" class="btn-action btn-danger">Confirmar Exclusão</button>
+            </div>
+        </div>
+    </div>
 </main>
 
 <script src="/js/admin.js"></script>
