@@ -27,6 +27,7 @@
     font-size: 18px;
 }
 
+/* Esta regra alinha os filtros horizontalmente */
 .filter-options {
     display: flex;
     gap: 30px;

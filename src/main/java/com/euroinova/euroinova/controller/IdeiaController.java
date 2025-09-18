@@ -33,26 +33,21 @@ public class IdeiaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Ideia> buscarIdeiaPorId(@PathVariable Long id, @RequestParam Long usuarioId) {
-        // Busca a ideia no repositório pelo ID
         Optional<Ideia> ideiaOpt = ideiaRepository.findById(id);
 
         if (ideiaOpt.isPresent()) {
             Ideia ideia = ideiaOpt.get();
-            // Verifica se o usuário logado já votou nesta ideia
             boolean votado = votoRepository.findByUsuarioIdAndIdeiaId(usuarioId, ideia.getId()).isPresent();
             ideia.setVotadoPeloUsuarioAtual(votado);
             return ResponseEntity.ok(ideia);
         } else {
-            // Se não encontrar a ideia, retorna um erro "Não Encontrado" (404)
             return ResponseEntity.notFound().build();
         }
     }
 
-    // Endpoint para a lista de ideias do dashboard e da página "Minhas Ideias"
     @GetMapping
     public List<Ideia> listarIdeiasPorUsuario(@RequestParam Long usuarioId) {
         List<Ideia> ideias = ideiaRepository.findByUsuarioId(usuarioId);
-        // Para cada ideia, verifica se o usuário votou
         marcarIdeiasVotadas(usuarioId, ideias);
         return ideias;
     }
@@ -63,30 +58,34 @@ public class IdeiaController {
         }
     }
 
-    // Endpoint para a página "Explorar"
+    // --- ENDPOINT ATUALIZADO PARA A PÁGINA EXPLORAR ---
     @GetMapping("/todas")
     public List<Ideia> listarTodasOrdenado(
             @RequestParam Long usuarioId,
             @RequestParam(required = false, defaultValue = "recentes") String ordenarPor,
-            @RequestParam(required = false) String departamento) {
+            @RequestParam(required = false) String departamento,
+            @RequestParam(required = false) String status) { // NOVO PARÂMETRO
 
         // 1. Busca todas as ideias
         List<Ideia> todasIdeias = ideiaRepository.findAll();
 
-        // 2. Filtra por departamento, se um for fornecido
-        List<Ideia> ideiasFiltradas;
-        if (departamento != null && !departamento.isEmpty() && !departamento.equals("Todos")) {
-            ideiasFiltradas = todasIdeias.stream()
-                    .filter(ideia -> departamento.equals(ideia.getDepartamento()))
-                    .collect(Collectors.toList());
-        } else {
-            ideiasFiltradas = todasIdeias;
-        }
+        // 2. Filtra por departamento e status usando Java Streams
+        List<Ideia> ideiasFiltradas = todasIdeias.stream()
+                .filter(ideia -> {
+                    // Filtro de departamento
+                    boolean correspondeDepartamento = (departamento == null || departamento.isEmpty() || departamento.equals("Todos"))
+                            || departamento.equals(ideia.getDepartamento());
+                    // Filtro de status
+                    boolean correspondeStatus = (status == null || status.isEmpty() || status.equals("Todos"))
+                            || status.equals(ideia.getStatus());
+                    return correspondeDepartamento && correspondeStatus;
+                })
+                .collect(Collectors.toList());
 
-        // 3. Ordena a lista filtrada
+        // 3. Ordena a lista já filtrada
         if ("votos".equals(ordenarPor)) {
             ideiasFiltradas.sort(Comparator.comparingInt(Ideia::getVotos).reversed());
-        } else {
+        } else { // "recentes" é o padrão
             ideiasFiltradas.sort(Comparator.comparingLong(Ideia::getId).reversed());
         }
 
@@ -96,7 +95,6 @@ public class IdeiaController {
         return ideiasFiltradas;
     }
 
-    // Endpoint para criar uma nova ideia
     @PostMapping
     public ResponseEntity<Ideia> criarIdeia(@RequestBody NovaIdeiaDTO novaIdeiaDTO, @RequestParam Long usuarioId) {
         Usuario autor = usuarioRepository.findById(usuarioId)
@@ -108,17 +106,14 @@ public class IdeiaController {
         novaIdeia.setUsuarioId(usuarioId);
         novaIdeia.setAutor(autor.getNome());
         novaIdeia.setDepartamento(autor.getDepartamento());
-
         novaIdeia.setStatus("Pendente");
         novaIdeia.setVotos(0);
         novaIdeia.setComentarios(0);
-
         Ideia ideiaSalva = ideiaRepository.save(novaIdeia);
 
         return new ResponseEntity<>(ideiaSalva, HttpStatus.CREATED);
     }
 
-    // Endpoint para votar ou desvotar em uma ideia
     @PostMapping("/{ideiaId}/votar")
     public ResponseEntity<Ideia> votarNaIdeia(@PathVariable Long ideiaId, @RequestParam Long usuarioId) {
 
@@ -128,7 +123,6 @@ public class IdeiaController {
         }
 
         Optional<Voto> votoExistente = votoRepository.findByUsuarioIdAndIdeiaId(usuarioId, ideiaId);
-
         Ideia ideia = ideiaOpt.get();
 
         if (votoExistente.isPresent()) {
@@ -144,7 +138,6 @@ public class IdeiaController {
         return ResponseEntity.ok(ideiaAtualizada);
     }
 
-    // Endpoint para atualizar uma ideia
     @PutMapping("/{id}")
     public ResponseEntity<Ideia> atualizarIdeia(@PathVariable Long id, @RequestBody NovaIdeiaDTO ideiaDTO) {
         return ideiaRepository.findById(id)
@@ -156,16 +149,13 @@ public class IdeiaController {
                 }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Endpoint para deletar uma ideia
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarIdeia(@PathVariable Long id) {
         return ideiaRepository.findById(id)
                 .map(ideia -> {
-                    // Primeiro, deletamos os votos associados para não dar erro no banco
                     votoRepository.deleteByIdeiaId(ideia.getId());
-                    // Depois, deletamos a ideia
                     ideiaRepository.delete(ideia);
-                    return ResponseEntity.ok().build(); // Retorna 200 OK sem corpo
+                    return ResponseEntity.ok().build();
                 }).orElse(ResponseEntity.notFound().build());
     }
 }

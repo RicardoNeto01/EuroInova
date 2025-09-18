@@ -20,7 +20,6 @@ public class DashboardController {
 
     @GetMapping("/stats")
     public DashboardStatsDTO getStats(@RequestParam Long usuarioId) {
-        // ... método existente ...
         DashboardStatsDTO stats = new DashboardStatsDTO();
         stats.setMinhasIdeias(ideiaRepository.countByUsuarioId(usuarioId));
         stats.setIdeiasAprovadas(ideiaRepository.countByUsuarioIdAndStatus(usuarioId, "Aprovada"));
@@ -30,7 +29,6 @@ public class DashboardController {
         return stats;
     }
 
-    // --- NOVO MÉTODO/ENDPOINT ---
     @GetMapping("/top-ideias")
     public List<Ideia> getTopIdeias() {
         return ideiaRepository.findTop3ByOrderByVotosDesc();

@@ -46,16 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const ideaListContainer = document.querySelector('.idea-list-container');
     const sortButtons = document.querySelectorAll('.sort-btn');
     const departmentFilterSelect = document.getElementById('filter-department');
+    const statusFilterSelect = document.getElementById('filter-status'); // Novo filtro
 
     async function carregarTodasIdeias() {
         const activeSortButton = document.querySelector('.sort-btn.active');
         const ordenarPor = activeSortButton ? activeSortButton.dataset.sort : 'recentes';
         const departamento = departmentFilterSelect.value;
+        const status = statusFilterSelect.value; // Pega o valor do novo filtro
+
         const url = new URL('/api/ideias/todas', window.location.origin);
         url.searchParams.append('usuarioId', usuarioLogado.id);
         url.searchParams.append('ordenarPor', ordenarPor);
         if (departamento && departamento !== 'Todos') {
             url.searchParams.append('departamento', departamento);
+        }
+        if (status && status !== 'Todos') { // Adiciona o status à URL da API
+            url.searchParams.append('status', status);
         }
         try {
             const response = await fetch(url);
@@ -68,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- FUNÇÃO DE RENDERIZAÇÃO ATUALIZADA COM LÓGICA DE STATUS ---
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -76,31 +81,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         ideias.forEach(ideia => {
-            let statusClass = '';
-            let statusHTML = '';
-
-            // Lógica para definir a classe da borda e a "pílula" de status
-            switch (ideia.status) {
-                case 'Aprovada':
-                    statusClass = 'approved';
-                    statusHTML = `<span class="status-pill status-approved">Aprovada</span>`;
-                    break;
-                case 'Pendente':
-                    statusClass = 'pending';
-                    statusHTML = `<span class="status-pill status-pending">Pendente</span>`;
-                    break;
-                case 'Rejeitada':
-                    statusClass = 'rejected';
-                    statusHTML = `<span class="status-pill status-rejected">Rejeitada</span>`;
-                    break;
-            }
-
             const postHTML = `
-                <article class="idea-post ${statusClass}" data-id="${ideia.id}">
+                <article class="idea-post ${ideia.status === 'Aprovada' ? 'approved' : ''}" data-id="${ideia.id}">
                     <div class="post-header">
                         <span class="author">${ideia.autor}</span>
                         <span class="department">${ideia.departamento}</span>
-                        ${statusHTML}
+                        ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
                     </div>
                     <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>
                     <p class="ideia-descricao">${ideia.descricao}</p>
@@ -114,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Lógica de Votação
     ideaListContainer.addEventListener('click', async function(event) {
         const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
@@ -139,6 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- 3. EVENT LISTENERS PARA OS FILTROS ---
     departmentFilterSelect.addEventListener('change', carregarTodasIdeias);
+    statusFilterSelect.addEventListener('change', carregarTodasIdeias); // Adiciona o listener para o novo filtro
+
     sortButtons.forEach(button => {
         button.addEventListener('click', () => {
             document.querySelector('.sort-btn.active').classList.remove('active');

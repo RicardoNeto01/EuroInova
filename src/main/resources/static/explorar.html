@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explorar Ideias - EuroInova</title>
     <link rel="stylesheet" href="/css/global.css">
-    <link rel="stylesheet" href="/css/dashboard.css"> <link rel="stylesheet" href="/css/explorar.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/explorar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
@@ -42,7 +44,9 @@
             <i class="fas fa-filter"></i>
             <h3>Filtros e Ordenação</h3>
         </div>
+
         <div class="filter-options">
+
             <div class="filter-group">
                 <label for="filter-department">Departamento</label>
                 <select id="filter-department">
@@ -54,6 +58,17 @@
                     <option value="Operações">Operações</option>
                 </select>
             </div>
+
+            <div class="filter-group">
+                <label for="filter-status">Status</label>
+                <select id="filter-status">
+                    <option value="Todos">Todos os Status</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Aprovada">Aprovada</option>
+                    <option value="Rejeitada">Rejeitada</option>
+                </select>
+            </div>
+
             <div class="filter-group">
                 <label>Ordenar por</label>
                 <div class="sort-options">
@@ -61,6 +76,7 @@
                     <button class="sort-btn" data-sort="votos">Mais Votadas</button>
                 </div>
             </div>
+
         </div>
     </div>
     <div class="idea-list-container">
