@@ -23,4 +23,6 @@ public class Usuario {
     private String emailCorporativo;
     private String senha;
     private String departamento;
+
+    private String role;
 }

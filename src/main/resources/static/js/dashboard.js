@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. LÓGICA DE AUTENTICAÇÃO E CARREGAMENTO DE DADOS DO USUÁRIO ---
+    // --- 1. LÓGICA DE AUTENTICAÇÃO E REDIRECIONAMENTO POR CARGO ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
 
     if (!usuarioLogado) {
@@ -8,13 +8,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // LÓGICA DE REDIRECIONAMENTO: Se o usuário for ADMIN, envia para a página de admin
+    if (usuarioLogado.role === 'ADMIN') {
+        window.location.href = '/admin.html';
+        return; // Para a execução do script para não carregar o dashboard para o admin
+    }
+
+
+    // --- O CÓDIGO ABAIXO SÓ EXECUTA PARA USUÁRIOS NORMAIS ---
+
+    // --- 2. MONTAGEM DA PÁGINA PARA O USUÁRIO ---
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
     document.getElementById('mensagem-boas-vindas').textContent = `Bem-vindo(a) de volta, ${usuarioLogado.nome}!`;
 
     const mainColumn = document.querySelector('.main-column');
     const ideaListContainer = document.querySelector('.idea-list');
 
-    // --- 2. FUNÇÕES PARA CARREGAR DADOS DINÂMICOS DA API ---
+    // --- 3. FUNÇÕES PARA CARREGAR DADOS DINÂMICOS DA API ---
 
     async function carregarStats() {
         try {
@@ -58,9 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="department">${ideia.departamento}</span>
                         ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
                     </div>
-
                     <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>
-
                     <p class="ideia-descricao">${ideia.descricao}</p>
                     <div class="post-footer">
                         <span class="votes btn-votar ${ideia.votadoPeloUsuarioAtual ? 'voted' : ''}">${ideia.votos} <i class="fas fa-thumbs-up"></i></span>
@@ -76,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const topIdeiasList = document.getElementById('top-ideas-list');
         const MAX_TITLE_LENGTH = 30;
         try {
-            const response = await fetch('/api/dashboard/top-ideias');
+            const response = await fetch(`/api/dashboard/top-ideias?usuarioId=${usuarioLogado.id}`);
             if (!response.ok) throw new Error('Falha ao carregar top ideias');
 
             const topIdeias = await response.json();
@@ -105,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- 3. LÓGICA DE CLIQUE (APENAS VOTO) ---
+    // --- 4. LÓGICAS DE INTERAÇÃO (VOTO, MODAL, MENU, LOGOFF) ---
     mainColumn.addEventListener('click', async function(event) {
         const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
@@ -131,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- 4. LÓGICA DO MODAL DE NOVA IDEIA ---
     const modal = document.getElementById('modal-nova-ideia');
     const btnAbrirModal = document.querySelector('.btn-new-idea');
     const btnFecharModal = document.getElementById('fechar-modal');
@@ -164,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- 5. LÓGICA DO MENU LATERAL (SIDENAV) ---
     const hamburgerBtn = document.getElementById('hamburger-menu');
     const sideNav = document.getElementById('side-nav');
     const overlay = document.getElementById('overlay');
@@ -173,17 +179,19 @@ document.addEventListener('DOMContentLoaded', function() {
     hamburgerBtn.addEventListener('click', abrirMenu);
     overlay.addEventListener('click', fecharMenu);
 
-    // --- 6. LÓGICA DO BOTÃO DE LOGOFF ---
     const btnLogoff = document.getElementById('btn-logoff');
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
         localStorage.removeItem('usuarioLogado');
-        alert('Você saiu com sucesso!');
         window.location.href = '/login.html';
     });
 
-    // --- 7. CHAMADAS INICIAIS ---
+
+    // --- 5. CHAMADAS INICIAIS ---
     carregarStats();
     carregarIdeias();
     carregarTopIdeias();
 });
+
+// Inicia todo o processo
+document.addEventListener('DOMContentLoaded', initDashboard);

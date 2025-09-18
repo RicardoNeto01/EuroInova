@@ -21,51 +21,65 @@ public class AutenticacaoController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder; // Injeta a ferramenta de criptografia
 
-    // --- NOVO ENDPOINT DE REGISTRO ---
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody RegistroDTO registroDTO) {
-        // 1. Verifica se o usuário já existe usando o método do repositório
         if (usuarioRepository.existsByRaOrEmailCorporativo(registroDTO.getRa(), registroDTO.getEmailCorporativo())) {
-            // Se existir, retorna um erro "Conflict"
             return ResponseEntity.status(HttpStatus.CONFLICT).body("RA ou E-mail já cadastrado.");
         }
 
-        // 2. Cria uma nova instância de Usuário
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(registroDTO.getNome());
         novoUsuario.setRa(registroDTO.getRa());
         novoUsuario.setEmailCorporativo(registroDTO.getEmailCorporativo());
         novoUsuario.setDepartamento(registroDTO.getDepartamento());
 
-        // 3. CRIPTOGRAFA A SENHA ANTES DE SALVAR
+        // Criptografa a senha antes de salvar no banco
         novoUsuario.setSenha(passwordEncoder.encode(registroDTO.getSenha()));
 
-        // 4. Salva o novo usuário no banco de dados
-        usuarioRepository.save(novoUsuario);
+        novoUsuario.setRole("USER");
 
-        // 5. Retorna uma resposta de sucesso "Created"
+        usuarioRepository.save(novoUsuario);
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuário registrado com sucesso!");
     }
 
-    // --- ENDPOINT DE LOGIN ATUALIZADO PARA USAR CRIPTOGRAFIA ---
     @PostMapping("/login")
     public ResponseEntity<?> autenticarUsuario(@RequestBody LoginRequest loginRequest) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailCorporativoOrRa(loginRequest.getLogin(), loginRequest.getLogin());
 
-        // Ele compara a senha que o usuário digitou (em texto puro) com a senha
-        // criptografada que está no banco de dados.
+        // Verifica a senha digitada contra a senha criptografada no banco
         if (usuarioOpt.isPresent() && passwordEncoder.matches(loginRequest.getSenha(), usuarioOpt.get().getSenha())) {
-            // Se as senhas baterem, retorna o objeto do usuário
             return ResponseEntity.ok(usuarioOpt.get());
         }
 
-        // Se não encontrar o usuário ou a senha estiver errada, retorna erro.
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas.");
     }
 
-    // DTO para o corpo da requisição de login
+    // Cria usuários de teste com senhas criptografadas
+    @PostConstruct
+    public void criarUsuariosParaTeste() {
+        if (usuarioRepository.count() == 0) {
+            Usuario admin = new Usuario();
+            admin.setNome("Admin EuroInova");
+            admin.setRa("00001");
+            admin.setEmailCorporativo("admin@euroinova.com");
+            admin.setDepartamento("Administração");
+            admin.setSenha(passwordEncoder.encode("admin123")); // Criptografa a senha
+            admin.setRole("ADMIN");
+            usuarioRepository.save(admin);
+
+            Usuario user = new Usuario();
+            user.setNome("Ricardo Neto");
+            user.setRa("99947");
+            user.setEmailCorporativo("ricardo.neto@euroinova.com");
+            user.setDepartamento("TI");
+            user.setSenha(passwordEncoder.encode("12345")); // Criptografa a senha
+            user.setRole("USER");
+            usuarioRepository.save(user);
+        }
+    }
+
     @Data
     public static class LoginRequest {
         private String login;
