@@ -1,20 +1,25 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // --- 1. LÓGICA DE AUTENTICAÇÃO E VERIFICAÇÃO DE CARGO (ROLE) ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+
     if (!usuarioLogado) {
+        // Se não há usuário no localStorage, volta para o login
         window.location.href = '/login.html';
         return;
     }
-
+    // Se o usuário não for ADMIN, volta para o dashboard
     if (usuarioLogado.role !== 'ADMIN') {
-        alert('Acesso negado.');
+        alert('Acesso negado. Esta área é restrita para administradores.');
         window.location.href = '/dashboard.html';
         return;
     }
 
+    // --- 2. LÓGICA DE MONTAGEM DO CABEÇALHO E MENU ---
     const headerContainer = document.querySelector('.main-header');
     if (headerContainer) {
         headerContainer.innerHTML = `
             <div class="header-column header-left">
+                <button id="hamburger-menu" class="hamburger-menu"><i class="fas fa-bars"></i></button>
                 <div class="logo">EuroInova - ADMIN</div>
             </div>
             <div class="header-column header-center"></div>
@@ -23,9 +28,88 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span id="nome-usuario">${usuarioLogado.nome}</span>
                     <i class="fas fa-user-circle"></i>
                 </div>
-                <a href="/logout" id="btn-logoff" class="btn-logoff"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
+                <a href="#" id="btn-logoff" class="btn-logoff"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
             </div>
         `;
 
+        const hamburgerBtn = document.getElementById('hamburger-menu');
+        const sideNav = document.getElementById('side-nav');
+        const overlay = document.getElementById('overlay');
+        const btnLogoff = document.getElementById('btn-logoff');
+
+        if(hamburgerBtn && sideNav && overlay) {
+            function abrirMenu() { sideNav.classList.add('show'); overlay.classList.add('show'); }
+            function fecharMenu() { sideNav.classList.remove('show'); overlay.classList.remove('show'); }
+
+            hamburgerBtn.addEventListener('click', abrirMenu);
+            overlay.addEventListener('click', fecharMenu);
+        }
+
+        btnLogoff.addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('usuarioLogado');
+            alert('Você saiu com sucesso!');
+            window.location.href = '/login.html';
+        });
     }
+
+    // --- 3. LÓGICA PARA RENDERIZAR OS GRÁFICOS E STATS ---
+
+    // Função para o Gráfico de Pizza
+    async function renderStatusChart() {
+        try {
+            const response = await fetch('/api/admin/stats/status-distribution');
+            const data = await response.json();
+            const ctx = document.getElementById('statusPieChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
+                    datasets: [{
+                        label: 'Status das Ideias',
+                        data: [data.aprovadas, data.pendentes, data.rejeitadas],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(220, 53, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Erro ao renderizar o gráfico:", error);
+        }
+    }
+
+    // Função para os Cards de Totais
+    async function renderGlobalStats() {
+        try {
+            const response = await fetch('/api/admin/stats/global');
+            const data = await response.json();
+
+            document.getElementById('total-curtidas').textContent = data.totalCurtidas;
+            document.getElementById('total-comentarios').textContent = data.totalComentarios;
+        } catch (error) {
+            console.error("Erro ao renderizar as estatísticas globais:", error);
+        }
+    }
+
+    // --- 4. CHAMADAS INICIAIS ---
+    renderStatusChart();
+    renderGlobalStats();
 });

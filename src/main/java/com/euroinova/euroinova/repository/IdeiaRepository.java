@@ -18,4 +18,11 @@ public interface IdeiaRepository extends JpaRepository<Ideia, Long> {
     // --- NOVO MÉTODO ---
     // Encontra as 3 primeiras (Top3) ordenando por Votos em ordem Decrescente (Desc)
     List<Ideia> findTop3ByOrderByVotosDesc();
+
+    long countByStatus(String status);
+    @Query("SELECT SUM(i.votos) FROM Ideia i")
+    Long getTotalVotos();
+
+    @Query("SELECT SUM(i.comentarios) FROM Ideia i")
+    Long getTotalComentarios();
 }

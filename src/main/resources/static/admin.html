@@ -6,17 +6,58 @@
     <title>Admin - EuroInova</title>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+<nav id="side-nav" class="side-nav">
+    <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="/minhas-ideias.html"><i class="fas fa-lightbulb"></i> Minhas Ideias</a>
+    <a href="/explorar.html"><i class="fas fa-search"></i> Explorar</a>
+</nav>
+<div id="overlay" class="overlay"></div>
+
 <header class="main-header">
 </header>
+
 <main class="main-content">
     <div class="page-header">
         <h1>Painel do Administrador</h1>
     </div>
-    <p>Bem-vindo à área de administração. Em breve, as ferramentas de gerenciamento de ideias aparecerão aqui.</p>
+
+    <div class="admin-stats-container">
+
+        <div class="chart-card">
+            <h3>Ideias por Status</h3>
+            <div class="chart-container">
+                <canvas id="statusPieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="stats-cards-container">
+            <div class="stat-card">
+                <div class="stat-card-icon" style="color: #007bff;"><i class="fas fa-thumbs-up"></i></div>
+                <div class="stat-card-info">
+                    <span class="stat-card-title">Total de Curtidas</span>
+                    <span class="stat-card-value" id="total-curtidas">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon" style="color: #6c757d;"><i class="fas fa-comments"></i></div>
+                <div class="stat-card-info">
+                    <span class="stat-card-title">Total de Comentários</span>
+                    <span class="stat-card-value" id="total-comentarios">0</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </main>
+
 <script src="/js/admin.js"></script>
 </body>
 </html>
