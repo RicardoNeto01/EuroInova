@@ -53,9 +53,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // --- 3. LÓGICA PARA RENDERIZAR OS GRÁFICOS E STATS ---
+    // --- 3. LÓGICA PARA RENDERIZAR GRÁFICOS E STATS ---
 
-    // Função para o Gráfico de Pizza
     async function renderStatusChart() {
         try {
             const response = await fetch('/api/admin/stats/status-distribution');
@@ -69,26 +68,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                     datasets: [{
                         label: 'Status das Ideias',
                         data: [data.aprovadas, data.pendentes, data.rejeitadas],
-                        backgroundColor: [
-                            'rgba(40, 167, 69, 0.7)',
-                            'rgba(255, 193, 7, 0.7)',
-                            'rgba(220, 53, 69, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(40, 167, 69, 1)',
-                            'rgba(255, 193, 7, 1)',
-                            'rgba(220, 53, 69, 1)'
-                        ],
+                        backgroundColor: [ 'rgba(40, 167, 69, 0.7)', 'rgba(255, 193, 7, 0.7)', 'rgba(220, 53, 69, 0.7)' ],
+                        borderColor: [ 'rgba(40, 167, 69, 1)', 'rgba(255, 193, 7, 1)', 'rgba(220, 53, 69, 1)' ],
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: false }
-                    }
+                    plugins: { legend: { position: 'top' }, title: { display: false } }
                 }
             });
         } catch (error) {
@@ -96,12 +84,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // Função para os Cards de Totais
     async function renderGlobalStats() {
         try {
             const response = await fetch('/api/admin/stats/global');
             const data = await response.json();
-
             document.getElementById('total-curtidas').textContent = data.totalCurtidas;
             document.getElementById('total-comentarios').textContent = data.totalComentarios;
         } catch (error) {
@@ -109,7 +95,46 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // --- 4. CHAMADAS INICIAIS ---
+    // --- 4. LÓGICA PARA CARREGAR A TABELA DE IDEIAS ---
+    async function carregarTabelaDeIdeias() {
+        const tableBody = document.getElementById('ideias-table-body');
+        if (!tableBody) return;
+
+        try {
+            const response = await fetch('/api/admin/ideias');
+            const ideias = await response.json();
+
+            tableBody.innerHTML = '';
+            if (ideias.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6">Nenhuma ideia encontrada.</td></tr>';
+                return;
+            }
+
+            ideias.forEach(ideia => {
+                const rowHTML = `
+                    <tr>
+                        <td><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></td>
+                        <td>${ideia.autor}</td>
+                        <td>${ideia.departamento}</td>
+                        <td>${ideia.votos}</td>
+                        <td>${ideia.status}</td>
+                        <td>
+                            ...
+                        </td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', rowHTML);
+            });
+        } catch (error) {
+            console.error("Erro ao carregar a tabela de ideias:", error);
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="6">Erro ao carregar as ideias.</td></tr>';
+            }
+        }
+    }
+
+    // --- 5. CHAMADAS INICIAIS ---
     renderStatusChart();
     renderGlobalStats();
+    carregarTabelaDeIdeias();
 });
