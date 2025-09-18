@@ -1,20 +1,11 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    // --- 1. LÓGICA DE AUTENTICAÇÃO E VERIFICAÇÃO DE CARGO (ROLE) ---
+    // --- LÓGICA DE AUTENTICAÇÃO, CABEÇALHO E MENU ---
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
-
-    if (!usuarioLogado) {
-        // Se não há usuário no localStorage, volta para o login
-        window.location.href = '/login.html';
-        return;
-    }
-    // Se o usuário não for ADMIN, volta para o dashboard
-    if (usuarioLogado.role !== 'ADMIN') {
+    if (!usuarioLogado || usuarioLogado.role !== 'ADMIN') {
         alert('Acesso negado. Esta área é restrita para administradores.');
         window.location.href = '/dashboard.html';
         return;
     }
-
-    // --- 2. LÓGICA DE MONTAGEM DO CABEÇALHO E MENU ---
     const headerContainer = document.querySelector('.main-header');
     if (headerContainer) {
         headerContainer.innerHTML = `
@@ -53,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // --- 3. LÓGICA PARA RENDERIZAR GRÁFICOS E STATS ---
+    // --- LÓGICA DA PÁGINA DE ADMIN ---
 
     async function renderStatusChart() {
         try {
@@ -61,7 +52,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             const data = await response.json();
             const ctx = document.getElementById('statusPieChart').getContext('2d');
 
-            new Chart(ctx, {
+            // Destrói o gráfico anterior, se existir, para evitar sobreposição
+            if (window.myStatusChart instanceof Chart) {
+                window.myStatusChart.destroy();
+            }
+
+            window.myStatusChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
@@ -95,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // --- 4. LÓGICA PARA CARREGAR A TABELA DE IDEIAS ---
     async function carregarTabelaDeIdeias() {
         const tableBody = document.getElementById('ideias-table-body');
         if (!tableBody) return;
@@ -112,14 +107,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             ideias.forEach(ideia => {
                 const rowHTML = `
-                    <tr>
+                    <tr data-id="${ideia.id}">
                         <td><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></td>
                         <td>${ideia.autor}</td>
                         <td>${ideia.departamento}</td>
                         <td>${ideia.votos}</td>
-                        <td>${ideia.status}</td>
-                        <td>
-                            ...
+                        <td class="status-cell">${ideia.status}</td>
+                        <td class="actions-cell">
+                            <select class="status-select">
+                                <option value="Pendente" ${ideia.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                                <option value="Aprovada" ${ideia.status === 'Aprovada' ? 'selected' : ''}>Aprovada</option>
+                                <option value="Rejeitada" ${ideia.status === 'Rejeitada' ? 'selected' : ''}>Rejeitada</option>
+                            </select>
                         </td>
                     </tr>
                 `;
@@ -133,7 +132,39 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // --- 5. CHAMADAS INICIAIS ---
+    // --- LÓGICA PARA MUDANÇA DE STATUS ---
+    const tableContainer = document.querySelector('.management-table-container');
+    tableContainer.addEventListener('change', async function(event) {
+        if (event.target.classList.contains('status-select')) {
+            const selectElement = event.target;
+            const novoStatus = selectElement.value;
+            const row = selectElement.closest('tr');
+            const ideiaId = row.dataset.id;
+
+            try {
+                const response = await fetch(`/api/admin/ideias/${ideiaId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: novoStatus })
+                });
+
+                if (!response.ok) throw new Error('Falha ao atualizar o status.');
+
+                row.querySelector('.status-cell').textContent = novoStatus;
+
+                // ATUALIZA O GRÁFICO DE PIZZA EM TEMPO REAL
+                renderStatusChart();
+
+                alert('Status da ideia atualizado com sucesso!');
+            } catch (error) {
+                console.error("Erro ao atualizar status:", error);
+                alert(error.message);
+                selectElement.value = row.querySelector('.status-cell').textContent;
+            }
+        }
+    });
+
+    // --- CHAMADAS INICIAIS ---
     renderStatusChart();
     renderGlobalStats();
     carregarTabelaDeIdeias();

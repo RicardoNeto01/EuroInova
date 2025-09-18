@@ -8,14 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // LÓGICA DE REDIRECIONAMENTO: Se o usuário for ADMIN, envia para a página de admin
     if (usuarioLogado.role === 'ADMIN') {
         window.location.href = '/admin.html';
-        return; // Para a execução do script para não carregar o dashboard para o admin
+        return;
     }
-
-
-    // --- O CÓDIGO ABAIXO SÓ EXECUTA PARA USUÁRIOS NORMAIS ---
 
     // --- 2. MONTAGEM DA PÁGINA PARA O USUÁRIO ---
     document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
@@ -54,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- FUNÇÃO DE RENDERIZAÇÃO ATUALIZADA COM LÓGICA DE STATUS ---
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -61,12 +58,31 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         ideias.forEach(ideia => {
+            let statusClass = '';
+            let statusHTML = '';
+
+            // Lógica para definir a classe da borda e a "pílula" de status
+            switch (ideia.status) {
+                case 'Aprovada':
+                    statusClass = 'approved';
+                    statusHTML = `<span class="status-pill status-approved">Aprovada</span>`;
+                    break;
+                case 'Pendente':
+                    statusClass = 'pending';
+                    statusHTML = `<span class="status-pill status-pending">Pendente</span>`;
+                    break;
+                case 'Rejeitada':
+                    statusClass = 'rejected';
+                    statusHTML = `<span class="status-pill status-rejected">Rejeitada</span>`;
+                    break;
+            }
+
             const postHTML = `
-                <article class="idea-post ${ideia.status === 'Aprovada' ? 'approved' : ''}" data-id="${ideia.id}">
+                <article class="idea-post ${statusClass}" data-id="${ideia.id}">
                     <div class="post-header">
                         <span class="author">${ideia.autor}</span>
                         <span class="department">${ideia.departamento}</span>
-                        ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
+                        ${statusHTML}
                     </div>
                     <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>
                     <p class="ideia-descricao">${ideia.descricao}</p>
@@ -192,6 +208,3 @@ document.addEventListener('DOMContentLoaded', function() {
     carregarIdeias();
     carregarTopIdeias();
 });
-
-// Inicia todo o processo
-document.addEventListener('DOMContentLoaded', initDashboard);

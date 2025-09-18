@@ -426,3 +426,39 @@ body {
     color: #0056b3; /* Fica azul ao passar o mouse */
     text-decoration: underline;
 }
+/* --- ESTILOS VISUAIS PARA STATUS DAS IDEIAS --- */
+
+/* Base para todas as 'pílulas' de status */
+.status-pill {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+/* Cor para Status Aprovada (Verde) */
+.idea-post.approved {
+    border-left: 4px solid #28a745;
+}
+.status-approved {
+    background-color: #e4f8e8;
+    color: #155724;
+}
+
+/* Cor para Status Pendente (Amarelo) */
+.idea-post.pending {
+    border-left: 4px solid #ffc107;
+}
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Cor para Status Rejeitada (Vermelho) */
+.idea-post.rejected {
+    border-left: 4px solid #dc3545;
+}
+.status-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}

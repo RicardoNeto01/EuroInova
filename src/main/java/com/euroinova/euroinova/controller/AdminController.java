@@ -48,4 +48,18 @@ public class AdminController {
         );
         return ResponseEntity.ok(stats);
     }
+    @PutMapping("/ideias/{id}/status")
+    public ResponseEntity<Ideia> atualizarStatusIdeia(@PathVariable Long id, @RequestBody Map<String, String> statusUpdate) {
+        String novoStatus = statusUpdate.get("status");
+        if (novoStatus == null || novoStatus.isEmpty()) {
+            return ResponseEntity.badRequest().build(); // Retorna erro se o status não for enviado
+        }
+
+        return ideiaRepository.findById(id)
+                .map(ideia -> {
+                    ideia.setStatus(novoStatus);
+                    Ideia ideiaAtualizada = ideiaRepository.save(ideia);
+                    return ResponseEntity.ok(ideiaAtualizada);
+                }).orElse(ResponseEntity.notFound().build());
+    }
 }

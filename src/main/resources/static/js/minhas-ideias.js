@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Função de renderização com os títulos como links e botões de ação
+    // --- FUNÇÃO DE RENDERIZAÇÃO ATUALIZADA COM LÓGICA DE STATUS ---
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -48,12 +48,31 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         ideias.forEach(ideia => {
+            let statusClass = '';
+            let statusHTML = '';
+
+            // Lógica para definir a classe da borda e a "pílula" de status
+            switch (ideia.status) {
+                case 'Aprovada':
+                    statusClass = 'approved';
+                    statusHTML = `<span class="status-pill status-approved">Aprovada</span>`;
+                    break;
+                case 'Pendente':
+                    statusClass = 'pending';
+                    statusHTML = `<span class="status-pill status-pending">Pendente</span>`;
+                    break;
+                case 'Rejeitada':
+                    statusClass = 'rejected';
+                    statusHTML = `<span class="status-pill status-rejected">Rejeitada</span>`;
+                    break;
+            }
+
             const postHTML = `
-                <article class="idea-post ${ideia.status === 'Aprovada' ? 'approved' : ''}" data-id="${ideia.id}">
+                <article class="idea-post ${statusClass}" data-id="${ideia.id}">
                     <div class="post-header">
                         <span class="author">${ideia.autor}</span>
                         <span class="department">${ideia.departamento}</span>
-                        ${ideia.status === 'Aprovada' ? '<span class="status-approved">Aprovada</span>' : ''}
+                        ${statusHTML}
                     </div>
 
                     <h3><a href="/ideia.html?id=${ideia.id}" class="ideia-titulo-link">${ideia.titulo}</a></h3>

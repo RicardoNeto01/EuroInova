@@ -92,3 +92,16 @@
 .management-table tbody tr:hover {
     background-color: #f8f9fa;
 }
+/* --- ESTILOS PARA AS AÇÕES DA TABELA --- */
+.actions-cell {
+    text-align: center;
+}
+
+.status-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    background-color: #f8f9fa;
+}
