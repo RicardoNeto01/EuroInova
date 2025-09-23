@@ -55,7 +55,7 @@ O projeto segue uma arquitetura planejada para ser baseada em microsserviços, s
 ### Passos
 1.  Clone o repositório:
     ```bash
-    git clone [https://github.com/RicardoNeto01/EuroInova.git](https://github.com/RicardoNeto01/EuroInova.git)
+    git clone https://github.com/RicardoNeto01/EuroInova.git
     ```
 2.  Navegue até a pasta do projeto:
     ```bash
