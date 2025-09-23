@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // --- LÓGICA DA PÁGINA DE ADMIN ---
-    let ideaIdToDelete = null; // Variável global para guardar o ID da ideia a ser excluída
 
+    // Funções de renderizar gráficos e stats
     async function renderStatusChart() {
         try {
             const response = await fetch('/api/admin/stats/status-distribution');
@@ -91,17 +91,34 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
+    // --- LÓGICA DA TABELA COM FILTROS ---
+    const tableBody = document.getElementById('ideias-table-body');
+    const departmentFilter = document.getElementById('admin-filter-department');
+    const statusFilter = document.getElementById('admin-filter-status');
+    const sortButtons = document.querySelectorAll('.admin-filters .sort-btn');
+
     async function carregarTabelaDeIdeias() {
-        const tableBody = document.getElementById('ideias-table-body');
-        if (!tableBody) return;
+        const activeSortButton = document.querySelector('.admin-filters .sort-btn.active');
+        const ordenarPor = activeSortButton ? activeSortButton.dataset.sort : 'recentes';
+        const departamento = departmentFilter.value;
+        const status = statusFilter.value;
+
+        const url = new URL('/api/admin/ideias', window.location.origin);
+        url.searchParams.append('ordenarPor', ordenarPor);
+        if (departamento !== 'Todos') {
+            url.searchParams.append('departamento', departamento);
+        }
+        if (status !== 'Todos') {
+            url.searchParams.append('status', status);
+        }
 
         try {
-            const response = await fetch('/api/admin/ideias');
+            const response = await fetch(url);
             const ideias = await response.json();
 
             tableBody.innerHTML = '';
             if (ideias.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6">Nenhuma ideia encontrada.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6">Nenhuma ideia encontrada com os filtros selecionados.</td></tr>';
                 return;
             }
 
@@ -140,27 +157,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     const confirmDeleteModal = document.getElementById('confirm-delete-modal');
     const btnConfirmDelete = document.getElementById('btn-confirm-delete');
     const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    let ideaIdToDelete = null;
 
-    // Evento para cliques (para abrir o modal de exclusão)
     tableContainer.addEventListener('click', function(event) {
         const deleteButton = event.target.closest('.btn-delete-admin');
         if (deleteButton) {
             const row = deleteButton.closest('tr');
-            ideaIdToDelete = row.dataset.id; // Guarda o ID da ideia a ser excluída
-            confirmDeleteModal.classList.remove('hidden'); // Abre o modal
+            ideaIdToDelete = row.dataset.id;
+            confirmDeleteModal.classList.remove('hidden');
         }
     });
 
-    // Evento para fechar o modal
     btnCancelDelete.addEventListener('click', () => {
         confirmDeleteModal.classList.add('hidden');
-        ideaIdToDelete = null; // Limpa o ID guardado
+        ideaIdToDelete = null;
     });
 
-    // Evento para confirmar a exclusão
     btnConfirmDelete.addEventListener('click', async () => {
         if (!ideaIdToDelete) return;
-
         try {
             const response = await fetch(`/api/admin/ideias/${ideaIdToDelete}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Falha ao excluir a ideia.');
@@ -180,27 +194,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-    // Evento para mudanças no select de status
     tableContainer.addEventListener('change', async function(event) {
         if (event.target.classList.contains('status-select')) {
             const selectElement = event.target;
             const novoStatus = selectElement.value;
             const row = selectElement.closest('tr');
             const ideiaId = row.dataset.id;
-
             try {
                 const response = await fetch(`/api/admin/ideias/${ideiaId}/status`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: novoStatus })
                 });
-
                 if (!response.ok) throw new Error('Falha ao atualizar o status.');
 
                 row.querySelector('.status-cell').textContent = novoStatus;
-
                 renderStatusChart();
-
                 alert('Status da ideia atualizado com sucesso!');
             } catch (error) {
                 console.error("Erro ao atualizar status:", error);
@@ -208,6 +217,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 selectElement.value = row.querySelector('.status-cell').textContent;
             }
         }
+    });
+
+    // --- EVENT LISTENERS PARA OS FILTROS DA TABELA ---
+    departmentFilter.addEventListener('change', carregarTabelaDeIdeias);
+    statusFilter.addEventListener('change', carregarTabelaDeIdeias);
+    sortButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelector('.admin-filters .sort-btn.active').classList.remove('active');
+            button.classList.add('active');
+            carregarTabelaDeIdeias();
+        });
     });
 
     // --- CHAMADAS INICIAIS ---

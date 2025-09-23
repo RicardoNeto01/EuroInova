@@ -5,12 +5,13 @@ import com.euroinova.euroinova.repository.ComentarioRepository;
 import com.euroinova.euroinova.repository.IdeiaRepository;
 import com.euroinova.euroinova.repository.VotoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -25,13 +26,31 @@ public class AdminController {
     @Autowired
     private ComentarioRepository comentarioRepository;
 
-    // Endpoint para a tabela de gerenciamento de ideias
     @GetMapping("/ideias")
-    public List<Ideia> listarTodasIdeias() {
-        return ideiaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public List<Ideia> listarTodasIdeias(
+            @RequestParam(required = false, defaultValue = "recentes") String ordenarPor,
+            @RequestParam(required = false) String departamento,
+            @RequestParam(required = false) String status) {
+
+        List<Ideia> todasIdeias = ideiaRepository.findAll();
+
+        // Filtra a lista em memória
+        List<Ideia> ideiasFiltradas = todasIdeias.stream()
+                .filter(ideia -> (departamento == null || departamento.isEmpty() || departamento.equals("Todos") || departamento.equals(ideia.getDepartamento())))
+                .filter(ideia -> (status == null || status.isEmpty() || status.equals("Todos") || status.equals(ideia.getStatus())))
+                .collect(Collectors.toList());
+
+        // Ordena a lista já filtrada
+        if ("votos".equals(ordenarPor)) {
+            ideiasFiltradas.sort(Comparator.comparingInt(Ideia::getVotos).reversed());
+        } else { // "recentes" é o padrão
+            ideiasFiltradas.sort(Comparator.comparingLong(Ideia::getId).reversed());
+        }
+
+        return ideiasFiltradas;
     }
 
-    // EndPoint para dados do gráfico
+    // Endpoint para os dados do gráfico de pizza
     @GetMapping("/stats/status-distribution")
     public ResponseEntity<Map<String, Long>> getStatusDistribution() {
         long aprovadas = ideiaRepository.countByStatus("Aprovada");
@@ -45,6 +64,8 @@ public class AdminController {
         );
         return ResponseEntity.ok(stats);
     }
+
+    // Endpoint para os cards de estatísticas globais
     @GetMapping("/stats/global")
     public ResponseEntity<Map<String, Long>> getGlobalStats() {
         Long totalVotos = ideiaRepository.getTotalVotos();
@@ -56,11 +77,13 @@ public class AdminController {
         );
         return ResponseEntity.ok(stats);
     }
+
+    // Endpoint para atualizar o status de uma ideia
     @PutMapping("/ideias/{id}/status")
     public ResponseEntity<Ideia> atualizarStatusIdeia(@PathVariable Long id, @RequestBody Map<String, String> statusUpdate) {
         String novoStatus = statusUpdate.get("status");
         if (novoStatus == null || novoStatus.isEmpty()) {
-            return ResponseEntity.badRequest().build(); // Retorna erro se o status não for enviado
+            return ResponseEntity.badRequest().build();
         }
 
         return ideiaRepository.findById(id)
@@ -70,17 +93,16 @@ public class AdminController {
                     return ResponseEntity.ok(ideiaAtualizada);
                 }).orElse(ResponseEntity.notFound().build());
     }
+
+    // Endpoint para excluir uma ideia
     @DeleteMapping("/ideias/{id}")
     public ResponseEntity<?> deletarIdeia(@PathVariable Long id) {
         return ideiaRepository.findById(id)
                 .map(ideia -> {
-                    // 1. Exclui todos os votos associados
                     votoRepository.deleteByIdeiaId(id);
-                    // 2. Exclui todos os comentários associados
                     comentarioRepository.deleteByIdeiaId(id);
-                    // 3. Exclui a ideia
                     ideiaRepository.delete(ideia);
-                    return ResponseEntity.ok().build(); // Retorna 200 OK sem corpo
+                    return ResponseEntity.ok().build();
                 }).orElse(ResponseEntity.notFound().build());
     }
 }

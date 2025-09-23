@@ -56,22 +56,36 @@
     <div class="management-table-container">
         <div class="table-header">
             <h3>Gerenciamento de Ideias</h3>
+            <div class="admin-filters">
+                <div class="filter-group">
+                    <label for="admin-filter-department">Departamento</label>
+                    <select id="admin-filter-department">
+                        <option value="Todos">Todos</option>
+                        <option value="TI">TI</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="RH">RH</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Operações">Operações</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="admin-filter-status">Status</label>
+                    <select id="admin-filter-status">
+                        <option value="Todos">Todos</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Aprovada">Aprovada</option>
+                        <option value="Rejeitada">Rejeitada</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordenar por</label>
+                    <div class="sort-options">
+                        <button class="sort-btn active" data-sort="recentes">Mais Recentes</button>
+                        <button class="sort-btn" data-sort="votos">Mais Votadas</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <table class="management-table">
-            <thead>
-            <tr>
-                <th>Título da Ideia</th>
-                <th>Autor</th>
-                <th>Departamento</th>
-                <th>Votos</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
-            </thead>
-            <tbody id="ideias-table-body">
-            </tbody>
-        </table>
-    </div>
 
     <div id="confirm-delete-modal" class="modal-overlay hidden">
         <div class="modal-content confirm-modal">

@@ -163,3 +163,61 @@
 .btn-danger:hover {
     background-color: #c82333;
 }
+/* --- ESTILOS DOS FILTROS DO ADMIN --- */
+.table-header {
+    margin-bottom: 20px;
+}
+
+.table-header h3 {
+    margin-bottom: 20px;
+}
+
+.admin-filters {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eef2f5;
+}
+
+.admin-filters .filter-group label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+    display: block;
+}
+
+.admin-filters .filter-group select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    background-color: #f8f9fa;
+}
+
+/* Reutilizando os estilos dos botões da página Explorar */
+.admin-filters .sort-options {
+    display: flex;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    padding: 4px;
+}
+.admin-filters .sort-btn {
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    background-color: transparent;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.2s ease-in-out;
+}
+.admin-filters .sort-btn.active {
+    background-color: #fff;
+    color: #0056b3;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
