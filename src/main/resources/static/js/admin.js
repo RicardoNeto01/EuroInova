@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // --- LÓGICA DA PÁGINA DE ADMIN ---
 
-    // Funções de renderizar gráficos e stats
     async function renderStatusChart() {
         try {
             const response = await fetch('/api/admin/stats/status-distribution');
@@ -91,34 +90,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // --- LÓGICA DA TABELA COM FILTROS ---
-    const tableBody = document.getElementById('ideias-table-body');
-    const departmentFilter = document.getElementById('admin-filter-department');
-    const statusFilter = document.getElementById('admin-filter-status');
-    const sortButtons = document.querySelectorAll('.admin-filters .sort-btn');
-
     async function carregarTabelaDeIdeias() {
-        const activeSortButton = document.querySelector('.admin-filters .sort-btn.active');
-        const ordenarPor = activeSortButton ? activeSortButton.dataset.sort : 'recentes';
-        const departamento = departmentFilter.value;
-        const status = statusFilter.value;
-
-        const url = new URL('/api/admin/ideias', window.location.origin);
-        url.searchParams.append('ordenarPor', ordenarPor);
-        if (departamento !== 'Todos') {
-            url.searchParams.append('departamento', departamento);
-        }
-        if (status !== 'Todos') {
-            url.searchParams.append('status', status);
-        }
+        const tableBody = document.getElementById('ideias-table-body');
+        if (!tableBody) return;
 
         try {
-            const response = await fetch(url);
+            const response = await fetch('/api/admin/ideias');
             const ideias = await response.json();
 
             tableBody.innerHTML = '';
             if (ideias.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6">Nenhuma ideia encontrada com os filtros selecionados.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6">Nenhuma ideia encontrada.</td></tr>';
                 return;
             }
 
@@ -209,7 +191,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (!response.ok) throw new Error('Falha ao atualizar o status.');
 
                 row.querySelector('.status-cell').textContent = novoStatus;
+
                 renderStatusChart();
+
                 alert('Status da ideia atualizado com sucesso!');
             } catch (error) {
                 console.error("Erro ao atualizar status:", error);
@@ -217,17 +201,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 selectElement.value = row.querySelector('.status-cell').textContent;
             }
         }
-    });
-
-    // --- EVENT LISTENERS PARA OS FILTROS DA TABELA ---
-    departmentFilter.addEventListener('change', carregarTabelaDeIdeias);
-    statusFilter.addEventListener('change', carregarTabelaDeIdeias);
-    sortButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelector('.admin-filters .sort-btn.active').classList.remove('active');
-            button.classList.add('active');
-            carregarTabelaDeIdeias();
-        });
     });
 
     // --- CHAMADAS INICIAIS ---
