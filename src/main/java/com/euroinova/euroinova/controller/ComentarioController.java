@@ -3,9 +3,11 @@ package com.euroinova.euroinova.controller;
 import com.euroinova.euroinova.dto.NovoComentarioDTO;
 import com.euroinova.euroinova.model.Comentario;
 import com.euroinova.euroinova.model.Ideia;
+import com.euroinova.euroinova.model.Notificacao;
 import com.euroinova.euroinova.model.Usuario;
 import com.euroinova.euroinova.repository.ComentarioRepository;
 import com.euroinova.euroinova.repository.IdeiaRepository;
+import com.euroinova.euroinova.repository.NotificacaoRepository;
 import com.euroinova.euroinova.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,9 @@ public class ComentarioController {
     @Autowired
     private IdeiaRepository ideiaRepository;
 
+    @Autowired
+    private NotificacaoRepository notificacaoRepository;
+
     // Endpoint para BUSCAR todos os comentários de uma ideia
     @GetMapping
     public List<Comentario> buscarComentariosPorIdeia(@PathVariable Long ideiaId) {
@@ -38,12 +43,12 @@ public class ComentarioController {
     public ResponseEntity<Comentario> adicionarComentario(@PathVariable Long ideiaId,
                                                           @RequestParam Long usuarioId,
                                                           @RequestBody NovoComentarioDTO comentarioDTO) {
-        Usuario autor = usuarioRepository.findById(usuarioId)
+        Usuario autorComentario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
-        // Atualiza o contador de comentários na ideia
         Ideia ideia = ideiaRepository.findById(ideiaId)
                 .orElseThrow(() -> new RuntimeException("Ideia não encontrada!"));
+
         ideia.setComentarios(ideia.getComentarios() + 1);
         ideiaRepository.save(ideia);
 
@@ -51,9 +56,19 @@ public class ComentarioController {
         novoComentario.setTexto(comentarioDTO.getTexto());
         novoComentario.setIdeiaId(ideiaId);
         novoComentario.setUsuarioId(usuarioId);
-        novoComentario.setAutorNome(autor.getNome());
+        novoComentario.setAutorNome(autorComentario.getNome());
 
         Comentario comentarioSalvo = comentarioRepository.save(novoComentario);
+
+        // Só envia notificação se o comentador não for o dono da ideia
+        if (!ideia.getUsuarioId().equals(usuarioId)) {
+            Notificacao notificacao = new Notificacao();
+            notificacao.setUsuarioId(ideia.getUsuarioId()); // Notificação para o autor da ideia
+            notificacao.setMensagem(autorComentario.getNome() + " comentou na sua ideia: '" + ideia.getTitulo() + "'.");
+            notificacao.setLink("/ideia.html?id=" + ideia.getId());
+            notificacaoRepository.save(notificacao);
+        }
+
         return new ResponseEntity<>(comentarioSalvo, HttpStatus.CREATED);
     }
 }

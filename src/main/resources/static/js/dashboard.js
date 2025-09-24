@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- FUNÇÃO DE RENDERIZAÇÃO ATUALIZADA COM LÓGICA DE STATUS ---
     function renderizarIdeias(ideias) {
         ideaListContainer.innerHTML = '';
         if (ideias.length === 0) {
@@ -61,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let statusClass = '';
             let statusHTML = '';
 
-            // Lógica para definir a classe da borda e a "pílula" de status
             switch (ideia.status) {
                 case 'Aprovada':
                     statusClass = 'approved';
@@ -129,7 +127,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- 4. LÓGICAS DE INTERAÇÃO (VOTO, MODAL, MENU, LOGOFF) ---
+    // --- 4. LÓGICA DAS NOTIFICAÇÕES ---
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationPanel = document.getElementById('notification-panel');
+    const notificationList = document.getElementById('notification-list');
+    const notificationBadge = document.getElementById('notification-badge');
+
+    async function carregarNotificacoes() {
+        try {
+            const response = await fetch(`/api/notificacoes?usuarioId=${usuarioLogado.id}`);
+            const notificacoes = await response.json();
+
+            notificationList.innerHTML = '';
+            let unreadCount = 0;
+
+            if (notificacoes.length === 0) {
+                notificationList.innerHTML = '<p style="padding: 15px; text-align: center; color: #888;">Nenhuma notificação encontrada.</p>';
+            } else {
+                notificacoes.forEach(not => {
+                    if (!not.lida) {
+                        unreadCount++;
+                    }
+                    const itemHTML = `
+                        <a href="${not.link}" class="notification-item ${!not.lida ? 'unread' : ''}">
+                            <p>${not.mensagem}</p>
+                            <span class="notification-date">${new Date(not.dataCriacao).toLocaleDateString('pt-BR')}</span>
+                        </a>
+                    `;
+                    notificationList.insertAdjacentHTML('beforeend', itemHTML);
+                });
+            }
+
+            if (unreadCount > 0) {
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+
+        } catch (error) {
+            console.error("Erro ao carregar notificações:", error);
+        }
+    }
+
+    notificationBell.addEventListener('click', (event) => {
+        event.stopPropagation();
+        notificationPanel.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!notificationPanel.contains(event.target) && !notificationBell.contains(event.target)) {
+            notificationPanel.classList.add('hidden');
+        }
+    });
+
+
+    // --- 5. LÓGICAS DE INTERAÇÃO (VOTO, MODAL, MENU, LOGOFF) ---
     mainColumn.addEventListener('click', async function(event) {
         const voteButton = event.target.closest('.btn-votar');
         if (voteButton) {
@@ -199,12 +251,14 @@ document.addEventListener('DOMContentLoaded', function() {
     btnLogoff.addEventListener('click', function(event) {
         event.preventDefault();
         localStorage.removeItem('usuarioLogado');
+        alert('Você saiu com sucesso!');
         window.location.href = '/login.html';
     });
 
 
-    // --- 5. CHAMADAS INICIAIS ---
+    // --- 6. CHAMADAS INICIAIS ---
     carregarStats();
     carregarIdeias();
     carregarTopIdeias();
+    carregarNotificacoes();
 });

@@ -1,8 +1,10 @@
 package com.euroinova.euroinova.controller;
 
 import com.euroinova.euroinova.model.Ideia;
+import com.euroinova.euroinova.model.Notificacao;
 import com.euroinova.euroinova.repository.ComentarioRepository;
 import com.euroinova.euroinova.repository.IdeiaRepository;
+import com.euroinova.euroinova.repository.NotificacaoRepository;
 import com.euroinova.euroinova.repository.VotoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,10 @@ public class AdminController {
     @Autowired
     private ComentarioRepository comentarioRepository;
 
+    @Autowired
+    private NotificacaoRepository notificacaoRepository;
+
+    // Endpoint para a tabela de gestão de ideias com filtros
     @GetMapping("/ideias")
     public List<Ideia> listarTodasIdeias(
             @RequestParam(required = false, defaultValue = "recentes") String ordenarPor,
@@ -34,16 +40,14 @@ public class AdminController {
 
         List<Ideia> todasIdeias = ideiaRepository.findAll();
 
-        // Filtra a lista em memória
         List<Ideia> ideiasFiltradas = todasIdeias.stream()
                 .filter(ideia -> (departamento == null || departamento.isEmpty() || departamento.equals("Todos") || departamento.equals(ideia.getDepartamento())))
                 .filter(ideia -> (status == null || status.isEmpty() || status.equals("Todos") || status.equals(ideia.getStatus())))
                 .collect(Collectors.toList());
 
-        // Ordena a lista já filtrada
         if ("votos".equals(ordenarPor)) {
             ideiasFiltradas.sort(Comparator.comparingInt(Ideia::getVotos).reversed());
-        } else { // "recentes" é o padrão
+        } else {
             ideiasFiltradas.sort(Comparator.comparingLong(Ideia::getId).reversed());
         }
 
@@ -65,7 +69,7 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    // Endpoint para os cards de estatísticas globais
+    // Endpoint para os cartões de estatísticas globais
     @GetMapping("/stats/global")
     public ResponseEntity<Map<String, Long>> getGlobalStats() {
         Long totalVotos = ideiaRepository.getTotalVotos();
@@ -78,7 +82,7 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    // Endpoint para atualizar o status de uma ideia
+    // Endpoint para atualizar o status de uma ideia e criar notificação
     @PutMapping("/ideias/{id}/status")
     public ResponseEntity<Ideia> atualizarStatusIdeia(@PathVariable Long id, @RequestBody Map<String, String> statusUpdate) {
         String novoStatus = statusUpdate.get("status");
@@ -90,6 +94,14 @@ public class AdminController {
                 .map(ideia -> {
                     ideia.setStatus(novoStatus);
                     Ideia ideiaAtualizada = ideiaRepository.save(ideia);
+
+                    // Cria uma notificação para o autor da ideia
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setUsuarioId(ideia.getUsuarioId());
+                    notificacao.setMensagem("O status da sua ideia '" + ideia.getTitulo() + "' foi alterado para " + novoStatus + ".");
+                    notificacao.setLink("/ideia.html?id=" + ideia.getId());
+                    notificacaoRepository.save(notificacao);
+
                     return ResponseEntity.ok(ideiaAtualizada);
                 }).orElse(ResponseEntity.notFound().build());
     }
