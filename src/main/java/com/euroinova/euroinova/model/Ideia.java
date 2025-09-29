@@ -12,7 +12,9 @@ public class Ideia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 100)
     private String titulo;
+    @Column(columnDefinition = "TEXT")
     private String descricao;
     private String autor; // Nome do autor, para exibição
     private String departamento;
